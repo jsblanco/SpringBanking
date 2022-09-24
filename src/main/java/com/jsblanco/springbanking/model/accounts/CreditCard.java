@@ -1,38 +1,27 @@
 package com.jsblanco.springbanking.model.accounts;
 
 import com.jsblanco.springbanking.model.interfaces.HasInterestRate;
-import com.jsblanco.springbanking.model.users.AccountHolder;
-import com.jsblanco.springbanking.model.interfaces.HasBalance;
-import com.jsblanco.springbanking.model.interfaces.HasPenaltyFee;
-import com.jsblanco.springbanking.model.interfaces.IsOwned;
 import com.jsblanco.springbanking.model.util.Money;
 import jakarta.persistence.*;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
-import java.util.Currency;
 
 @Entity
-public class CreditCard extends Account implements HasPenaltyFee, IsOwned, HasBalance, HasInterestRate {
+@DiscriminatorValue("credit_card")
+public class CreditCard extends BankProduct implements HasInterestRate {
 
-    @Id
-    @GeneratedValue
-    private Integer id;
     private BigDecimal creditLimit;
     private BigDecimal interestRate;
-    private BigDecimal amount;
-    private Currency currency;
 
-    @OneToOne
-    @JoinColumn(name = "primary_owner", nullable = false)
-    @NonNull
-    private AccountHolder primaryOwner;
+    @Transient
+    BigDecimal minInterestRate = new BigDecimal("0.1");
+    @Transient
+    BigDecimal maxCreditLimit = new BigDecimal("100000");
 
-    @OneToOne
-    @JoinColumn(name = "secondary_owner", nullable = true)
-    @Nullable
-    private AccountHolder secondaryOwner;
+    public CreditCard() {
+        setCreditLimit(new Money(new BigDecimal("100")));
+        setInterestRate(new BigDecimal("0.1"));
+    }
 
     public Money getCreditLimit() {
         return new Money(creditLimit, getCurrency());
@@ -41,6 +30,8 @@ public class CreditCard extends Account implements HasPenaltyFee, IsOwned, HasBa
     public void setCreditLimit(Money creditLimit) {
         if (getCurrency() != creditLimit.getCurrency())
             throw new IllegalArgumentException("This account uses " + getCurrency() + " but you tried to input " + creditLimit.getCurrency() + ".");
+        if (creditLimit.getAmount().compareTo(maxCreditLimit)>0)
+            throw new IllegalArgumentException("Credit limit cannot be higher than " + maxCreditLimit);
         this.creditLimit = creditLimit.getAmount();
     }
 
@@ -48,9 +39,9 @@ public class CreditCard extends Account implements HasPenaltyFee, IsOwned, HasBa
         return new Money(interestRate, getCurrency());
     }
 
-    public void setInterestRate(Money interestRate) {
-        if (getCurrency() != interestRate.getCurrency())
-            throw new IllegalArgumentException("This account uses " + getCurrency() + " but you tried to input " + interestRate.getCurrency() + ".");
-        this.interestRate = interestRate.getAmount();
+    public void setInterestRate(BigDecimal interestRate) {
+        if (interestRate.compareTo(minInterestRate) < 0)
+            throw new IllegalArgumentException("Interest rate cannot fall beneath " + minInterestRate);
+        this.interestRate = interestRate;
     }
 }

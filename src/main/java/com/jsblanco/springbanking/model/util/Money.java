@@ -15,7 +15,6 @@ public class Money {
     /**
      * Class constructor specifying amount, currency, and rounding
      **/
-
     public Money(BigDecimal amount, Currency currency, RoundingMode rounding) {
         this.currency = currency;
         setAmount(amount.setScale(currency.getDefaultFractionDigits(), rounding));
