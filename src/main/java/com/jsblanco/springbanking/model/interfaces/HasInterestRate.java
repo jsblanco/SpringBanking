@@ -5,6 +5,9 @@ import com.jsblanco.springbanking.model.util.Money;
 import java.math.BigDecimal;
 
 public interface HasInterestRate {
-    public Money getInterestRate();
+    public BigDecimal getInterestRate();
     public void setInterestRate(BigDecimal interestRate);
+    public void mustInterestBeCharged();
+    public Money calculateInterest(int overduePeriods);
+
 }

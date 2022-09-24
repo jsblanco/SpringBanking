@@ -38,6 +38,17 @@ public abstract class BankProduct {
     @Transient
     final BigDecimal penaltyFee = new BigDecimal("40");
 
+    public void depositMoney(Money deposit) {
+        Money finalBalance = getBalance();
+        finalBalance.increaseAmount(deposit);
+        setBalance(finalBalance);
+    }
+
+    public void substractBalance(Money deposit) {
+        Money finalBalance = getBalance();
+        finalBalance.decreaseAmount(deposit);
+        setBalance(finalBalance);
+    }
 
     public Money getBalance() {
         return new Money(amount, currency);

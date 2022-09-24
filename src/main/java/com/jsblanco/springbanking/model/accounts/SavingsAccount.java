@@ -2,6 +2,7 @@ package com.jsblanco.springbanking.model.accounts;
 
 import com.jsblanco.springbanking.model.interfaces.HasInterestRate;
 import com.jsblanco.springbanking.model.interfaces.HasMinimumBalance;
+import com.jsblanco.springbanking.model.util.DateUtils;
 import com.jsblanco.springbanking.model.util.Money;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -9,6 +10,7 @@ import jakarta.persistence.Transient;
 import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Entity
 @DiscriminatorValue("savings_account")
@@ -18,6 +20,8 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
     private BigDecimal interestRate;
     @NonNull
     private BigDecimal minimumBalance;
+    @NonNull
+    private Date lastAccess;
 
     @Transient
     BigDecimal maxInterestRate = new BigDecimal("0.5");
@@ -29,6 +33,7 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
     public SavingsAccount() {
         setMinimumAmount(new BigDecimal(1000));
         setInterestRate(new BigDecimal("0.0025"));
+        setLastAccess(new Date());
     }
 
     public Money getMinimumBalance() {
@@ -46,7 +51,7 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
     }
 
     @Override
-    public void extractMoney(Money deposit) {
+    public void substractBalance(Money deposit) {
         super.setBalance(applyPenaltyIfNewBalanceIsBelowMinimum(deposit));
     }
 
@@ -57,8 +62,8 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
         super.setMinimumAmount(minimumAmount);
     }
 
-    public Money getInterestRate() {
-        return new Money(interestRate, getCurrency());
+    public BigDecimal getInterestRate() {
+        return interestRate;
     }
 
     public void setInterestRate(BigDecimal interestRate) {
@@ -67,5 +72,60 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
         if (interestRate.compareTo(minInterestRate) < 0)
             throw new IllegalArgumentException("Interest rate cannot fall under " + minInterestRate);
         this.interestRate = interestRate;
+    }
+
+    @Override
+    public void mustInterestBeCharged() {
+        Date today = new Date();
+        int overduePeriods = DateUtils.getPeriodBetweenDates(getLastAccess(), today).getYears();
+        if (overduePeriods > 0)
+            substractBalance(calculateInterest(overduePeriods));
+        setLastAccess(today);
+    }
+
+    @Override
+    public Money calculateInterest(int overduePeriods) {
+        return new Money(getAmount().multiply(
+                interestRate.multiply(new BigDecimal(overduePeriods)).add(new BigDecimal("1"))),
+                getCurrency());
+    }
+
+
+    public void setMinimumBalance(@NonNull BigDecimal minimumBalance) {
+        this.minimumBalance = minimumBalance;
+    }
+
+    @NonNull
+    public Date getLastAccess() {
+        return lastAccess;
+    }
+
+    public void setLastAccess(@NonNull Date lastAccess) {
+        this.lastAccess = lastAccess;
+        mustInterestBeCharged();
+    }
+
+    public BigDecimal getMaxInterestRate() {
+        return maxInterestRate;
+    }
+
+    public void setMaxInterestRate(BigDecimal maxInterestRate) {
+        this.maxInterestRate = maxInterestRate;
+    }
+
+    public BigDecimal getMinInterestRate() {
+        return minInterestRate;
+    }
+
+    public void setMinInterestRate(BigDecimal minInterestRate) {
+        this.minInterestRate = minInterestRate;
+    }
+
+    public BigDecimal getMinMinimumAccount() {
+        return minMinimumAccount;
+    }
+
+    public void setMinMinimumAccount(BigDecimal minMinimumAccount) {
+        this.minMinimumAccount = minMinimumAccount;
     }
 }

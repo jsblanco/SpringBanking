@@ -19,18 +19,6 @@ public abstract class Account extends BankProduct {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    public void depositMoney(Money deposit) {
-        Money finalBalance = getBalance();
-        finalBalance.increaseAmount(deposit);
-        setBalance(finalBalance);
-    }
-
-    public void extractMoney(Money deposit) {
-        Money finalBalance = getBalance();
-        finalBalance.decreaseAmount(deposit);
-        setBalance(finalBalance);
-    }
-
     public String getSecretKey() {
         return secretKey;
     }

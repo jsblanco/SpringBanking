@@ -2,6 +2,7 @@ package com.jsblanco.springbanking.model.accounts;
 
 import com.jsblanco.springbanking.model.interfaces.HasMinimumBalance;
 import com.jsblanco.springbanking.model.users.AccountHolder;
+import com.jsblanco.springbanking.model.util.DateUtils;
 import com.jsblanco.springbanking.model.util.Money;
 import jakarta.persistence.*;
 import org.springframework.lang.NonNull;
@@ -21,13 +22,8 @@ public class CheckingAccount extends Account implements HasMinimumBalance {
 
     public static Account createNew(AccountHolder primaryOwner, AccountHolder secondaryOwner) {
         if (primaryOwner == null) throw new IllegalArgumentException("Primary owner cannot be null");
-        if (Period.between(primaryOwner.getBirthDay().toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate()
-                , new Date().toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate()
-        ).getYears() < 24) return new StudentCheckingAccount();
+        if (DateUtils.getPeriodBetweenDates(primaryOwner.getBirthDay(), new Date()).getYears() < 24)
+            return new StudentCheckingAccount();
         CheckingAccount checkingAccount = new CheckingAccount();
         checkingAccount.setPrimaryOwner(primaryOwner);
         checkingAccount.setSecondaryOwner(secondaryOwner);
@@ -49,7 +45,7 @@ public class CheckingAccount extends Account implements HasMinimumBalance {
     }
 
     @Override
-    public void extractMoney(Money deposit) {
+    public void substractBalance(Money deposit) {
         super.setBalance(applyPenaltyIfNewBalanceIsBelowMinimum(deposit));
     }
 
