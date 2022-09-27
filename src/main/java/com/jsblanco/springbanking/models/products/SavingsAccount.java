@@ -42,8 +42,8 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
 
     @Override
     public void setBalance(Money newBalance) {
-        if (newBalance.getAmount().compareTo(minMinimumAccount)< 0)
-            throw new IllegalArgumentException("Balance cannot fall under 100 "+getCurrency());
+        if (newBalance.getAmount().compareTo(minMinimumAccount) < 0)
+            throw new IllegalArgumentException("Balance cannot fall under 100 " + getCurrency());
         super.setBalance(newBalance);
     }
 
@@ -85,16 +85,21 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
         this.interestRate = interestRate;
     }
 
-    @Override
-    public void chargeInterestIfApplies(Date lastAccess) {
-        Date today = DateUtils.today();
-        int overduePeriods = DateUtils.getPeriodBetweenDates(lastAccess, today).getYears();
-        if (overduePeriods > 0)
-            setBalance(new Money(HasInterestRate.subtractInterest(getAmount(), interestRate, overduePeriods), getCurrency()));
-    }
-
     public void setMinimumBalance(@NonNull BigDecimal minimumBalance) {
         this.minimumBalance = minimumBalance;
+    }
+
+    @Override
+    public int getOverduePeriods(Date lastAccess) {
+        Date today = DateUtils.today();
+        return DateUtils.getPeriodBetweenDates(lastAccess, today).getYears();
+    }
+
+    @Override
+    public void chargeInterestIfApplies(Date lastAccess) {
+        int overduePeriods = getOverduePeriods(lastAccess);
+        if (overduePeriods > 0)
+            setBalance(new Money(HasInterestRate.subtractInterest(getAmount(), interestRate, overduePeriods), getCurrency()));
     }
 
     @NonNull

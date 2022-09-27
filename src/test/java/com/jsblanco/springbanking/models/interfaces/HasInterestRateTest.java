@@ -1,5 +1,6 @@
 package com.jsblanco.springbanking.models.interfaces;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -8,13 +9,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class HasInterestRateTest {
 
+    @DisplayName("Should reduce balance by the interest rate for every overdue period")
     @Test
     void subtractInterest() {
         BigDecimal amount = new BigDecimal("1000.00");
         BigDecimal interestRate = new BigDecimal("0.10");
 
-        assertEquals(amount, HasInterestRate.subtractInterest(amount, interestRate, 0));
-        assertEquals(new BigDecimal("900.00"), HasInterestRate.subtractInterest(amount, interestRate, 1));
-        assertEquals(new BigDecimal("810.00"), HasInterestRate.subtractInterest(amount, interestRate, 2));
+        assertEquals(amount, HasInterestRate.subtractInterest(amount, interestRate, 0), "Balance should not change if there are no overdue periods");
+        assertEquals(new BigDecimal("900.00"), HasInterestRate.subtractInterest(amount, interestRate, 1), "Should apply the interest rate once if there is only one overdue period");
+        assertEquals(new BigDecimal("810.00"), HasInterestRate.subtractInterest(amount, interestRate, 2), "If there are multiple overdue periods, interest rate should be applied sequentially for each");
     }
 }

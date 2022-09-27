@@ -38,9 +38,9 @@ public abstract class BankProduct {
     @Transient
     final BigDecimal penaltyFee = new BigDecimal("40");
 
-    public void checkCurrency(Currency currency){
+    public void checkCurrency(Currency currency) {
         if (!currency.equals(getCurrency()))
-            throw new IllegalArgumentException("Currency must be converted to "+getCurrency()+" before making transactions");
+            throw new IllegalArgumentException("This account used " + getCurrency() + ". Currency must be converted to " + getCurrency() + " before making transactions");
     }
 
     public void increaseBalance(Money deposit) {

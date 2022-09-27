@@ -21,7 +21,6 @@ class BankProductTest {
         bankProduct = new TestBankProduct();
     }
 
-
     @DisplayName("Should increase balance as long as deposit is in the account's currency")
     @Test
     void increaseBalance() {

@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
 
-public interface HasInterestRate {
+public interface HasInterestRate extends HasPeriodicCosts {
     BigDecimal getInterestRate();
     void setInterestRate(BigDecimal interestRate);
     void chargeInterestIfApplies(Date lastAccess);

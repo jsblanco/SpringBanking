@@ -1,22 +1,32 @@
 package com.jsblanco.springbanking.models.products;
 
+import com.jsblanco.springbanking.models.interfaces.HasMaintenanceFee;
 import com.jsblanco.springbanking.models.interfaces.HasMinimumBalance;
+import com.jsblanco.springbanking.models.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Money;
 import jakarta.persistence.*;
 import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Entity
 @DiscriminatorValue("checking_account")
-public class CheckingAccount extends Account implements HasMinimumBalance {
+public class CheckingAccount extends Account implements HasMinimumBalance, HasMaintenanceFee {
     @NonNull
     private BigDecimal minimumBalance;
     @NonNull
     private BigDecimal monthlyMaintenanceFee;
+    @NonNull
+    private Date lastAccess;
 
     public Money getMinimumBalance() {
         return new Money(minimumBalance, getCurrency());
+    }
+
+    @Override
+    public void decreaseBalance(Money deposit) {
+        super.setBalance(applyPenaltyIfNewBalanceIsBelowMinimum(deposit));
     }
 
     @Override
@@ -29,14 +39,8 @@ public class CheckingAccount extends Account implements HasMinimumBalance {
         return finalBalance;
     }
 
-    @Override
-    public void decreaseBalance(Money deposit) {
-        super.setBalance(applyPenaltyIfNewBalanceIsBelowMinimum(deposit));
-    }
-
     public void setMinimumBalance(Money minimumBalance) {
-        if (getCurrency() != minimumBalance.getCurrency())
-            throw new IllegalArgumentException("This account uses " + getCurrency() + " but you tried to input " + minimumBalance.getCurrency() + ".");
+        checkCurrency(minimumBalance.getCurrency());
         this.minimumBalance = minimumBalance.getAmount();
     }
 
@@ -45,8 +49,31 @@ public class CheckingAccount extends Account implements HasMinimumBalance {
     }
 
     public void setMonthlyMaintenanceFee(Money monthlyMaintenanceFee) {
-        if (getCurrency() != monthlyMaintenanceFee.getCurrency())
-            throw new IllegalArgumentException("This account uses " + getCurrency() + " but you tried to input " + monthlyMaintenanceFee.getCurrency() + ".");
+        checkCurrency(monthlyMaintenanceFee.getCurrency());
         this.monthlyMaintenanceFee = monthlyMaintenanceFee.getAmount();
+    }
+
+
+    @Override
+    public int getOverduePeriods(Date lastAccess) {
+        Date today = DateUtils.today();
+        return DateUtils.getPeriodBetweenDates(lastAccess, today).getMonths();
+    }
+
+    @Override
+    public void chargeMaintenanceIfApplies(Date lastAccess) {
+        int overduePeriods = getOverduePeriods(lastAccess);
+        if (overduePeriods > 0)
+            setBalance(new Money(HasMaintenanceFee.subtractMaintenance(getAmount(), monthlyMaintenanceFee, overduePeriods), getCurrency()));
+    }
+
+    @NonNull
+    public Date getLastAccess() {
+        return lastAccess;
+    }
+
+    public void setLastAccess(@NonNull Date lastAccess) {
+        chargeMaintenanceIfApplies(lastAccess);
+        this.lastAccess = DateUtils.today();
     }
 }
