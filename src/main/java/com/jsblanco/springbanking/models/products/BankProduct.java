@@ -13,8 +13,8 @@ import java.util.Currency;
 
 
 @Entity
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="product_type")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "product_type")
 public abstract class BankProduct {
     @Id
     @GeneratedValue
@@ -38,13 +38,22 @@ public abstract class BankProduct {
     @Transient
     final BigDecimal penaltyFee = new BigDecimal("40");
 
-    public void depositMoney(Money deposit) {
+    public void checkCurrency(Currency currency){
+        if (!currency.equals(getCurrency()))
+            throw new IllegalArgumentException("Currency must be converted to "+getCurrency()+" before making transactions");
+    }
+
+    public void increaseBalance(Money deposit) {
+        checkCurrency(deposit.getCurrency());
+
         Money finalBalance = getBalance();
         finalBalance.increaseAmount(deposit);
         setBalance(finalBalance);
     }
 
     public void decreaseBalance(Money deposit) {
+        checkCurrency(deposit.getCurrency());
+
         Money finalBalance = getBalance();
         finalBalance.decreaseAmount(deposit);
         setBalance(finalBalance);
@@ -64,6 +73,7 @@ public abstract class BankProduct {
     }
 
     public void setMinimumBalance(Money balance) {
+        checkCurrency(balance.getCurrency());
         setMinimumAmount(balance.getAmount());
         setCurrency(balance.getCurrency());
     }

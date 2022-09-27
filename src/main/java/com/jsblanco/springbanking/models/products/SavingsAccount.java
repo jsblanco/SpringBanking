@@ -40,6 +40,13 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
         setInterestRate(defaultInterestRate);
     }
 
+    @Override
+    public void setBalance(Money newBalance) {
+        if (newBalance.getAmount().compareTo(minMinimumAccount)< 0)
+            throw new IllegalArgumentException("Balance cannot fall under 100 "+getCurrency());
+        super.setBalance(newBalance);
+    }
+
     public Money getMinimumBalance() {
         return new Money(minimumBalance, getCurrency());
     }
