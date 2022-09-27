@@ -75,4 +75,11 @@ public class Money {
     public String toString() {
         return getCurrency().getSymbol() + " " + getAmount();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Money)) return false;
+        return this.amount.equals(((Money) obj).getAmount())
+                && this.currency.equals(((Money) obj).getCurrency());
+    }
 }

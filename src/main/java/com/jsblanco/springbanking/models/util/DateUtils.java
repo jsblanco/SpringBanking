@@ -3,6 +3,7 @@ package com.jsblanco.springbanking.models.util;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 public abstract class DateUtils {
@@ -15,5 +16,9 @@ public abstract class DateUtils {
         return date.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
+    }
+
+    public static Date today(){
+        return Date.from(LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC));
     }
 }

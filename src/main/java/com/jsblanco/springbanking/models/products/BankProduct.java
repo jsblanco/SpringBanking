@@ -44,7 +44,7 @@ public abstract class BankProduct {
         setBalance(finalBalance);
     }
 
-    public void substractBalance(Money deposit) {
+    public void decreaseBalance(Money deposit) {
         Money finalBalance = getBalance();
         finalBalance.decreaseAmount(deposit);
         setBalance(finalBalance);

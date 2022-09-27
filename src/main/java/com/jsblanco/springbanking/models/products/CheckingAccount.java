@@ -1,14 +1,11 @@
 package com.jsblanco.springbanking.models.products;
 
 import com.jsblanco.springbanking.models.interfaces.HasMinimumBalance;
-import com.jsblanco.springbanking.models.users.AccountHolder;
-import com.jsblanco.springbanking.models.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Money;
 import jakarta.persistence.*;
 import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 @Entity
 @DiscriminatorValue("checking_account")
@@ -33,7 +30,7 @@ public class CheckingAccount extends Account implements HasMinimumBalance {
     }
 
     @Override
-    public void substractBalance(Money deposit) {
+    public void decreaseBalance(Money deposit) {
         super.setBalance(applyPenaltyIfNewBalanceIsBelowMinimum(deposit));
     }
 

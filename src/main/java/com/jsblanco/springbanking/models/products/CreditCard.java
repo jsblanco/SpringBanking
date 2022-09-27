@@ -21,18 +21,18 @@ public class CreditCard extends BankProduct implements HasInterestRate {
     private Date lastAccess;
 
     @Transient
-    private final BigDecimal defaultInterestRate = new BigDecimal("0.10");
+    private static final BigDecimal defaultInterestRate = new BigDecimal("0.10");
     @Transient
-    private final BigDecimal minInterestRate = new BigDecimal("0.10");
+    private static final BigDecimal minInterestRate = new BigDecimal("0.10");
     @Transient
-    private final BigDecimal defaultCreditLimit = new BigDecimal("100.00");
+    private static final BigDecimal defaultCreditLimit = new BigDecimal("100.00");
     @Transient
-    private final BigDecimal maxCreditLimit = new BigDecimal("100000.00");
+    private static final BigDecimal maxCreditLimit = new BigDecimal("100000.00");
 
     public CreditCard() {
-        setCreditLimit(new Money(defaultCreditLimit));
-        setInterestRate(defaultInterestRate);
         setLastAccess(new Date());
+        setInterestRate(defaultInterestRate);
+        setCreditLimit(new Money(defaultCreditLimit));
     }
 
     public Money getCreditLimit() {
@@ -58,35 +58,27 @@ public class CreditCard extends BankProduct implements HasInterestRate {
     }
 
     @Override
-    public void mustInterestBeCharged() {
-        Date today = new Date();
-        int overduePeriods = DateUtils.getPeriodBetweenDates(getLastAccess(), today).getMonths();
+    public void chargeInterestIfApplies(Date lastAccess) {
+        Date today = DateUtils.today();
+        int overduePeriods = DateUtils.getPeriodBetweenDates(lastAccess, today).getMonths();
         if (overduePeriods > 0)
-            substractBalance(calculateInterest(overduePeriods));
-        lastAccess = today;
-    }
-
-    @Override
-    public Money calculateInterest(int overduePeriods) {
-        return new Money(getAmount().multiply(
-                interestRate.multiply(new BigDecimal(overduePeriods)).add(new BigDecimal("1"))),
-                getCurrency());
+            setBalance(new Money(HasInterestRate.subtractInterest(getAmount(), interestRate, overduePeriods), getCurrency()));
     }
 
     public void setCreditLimit(@NonNull BigDecimal creditLimit) {
         if (maxCreditLimit.compareTo(creditLimit) < 0)
-            throw new IllegalArgumentException("Credit limit cannot be bigger than "+maxCreditLimit);
+            throw new IllegalArgumentException("Credit limit cannot be bigger than " + maxCreditLimit);
         this.creditLimit = creditLimit;
     }
 
-//    @NonNull
+    @NonNull
     public Date getLastAccess() {
         return lastAccess;
     }
 
     public void setLastAccess(@NonNull Date lastAccess) {
-        this.lastAccess = lastAccess;
-        mustInterestBeCharged();
+        chargeInterestIfApplies(lastAccess);
+        this.lastAccess = DateUtils.today();
     }
 
     public BigDecimal getMinInterestRate() {
