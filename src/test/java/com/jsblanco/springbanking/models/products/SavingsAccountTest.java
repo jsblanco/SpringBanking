@@ -59,10 +59,10 @@ class SavingsAccountTest {
 
         savingsAccount.setBalance(new Money(new BigDecimal("1000"), savingsAccount.getCurrency()));
         savingsAccount.chargeInterestIfApplies(Date.from(LocalDate.now().atStartOfDay().minusYears(1).toInstant(ZoneOffset.UTC)));
-        assertEquals(new Money(new BigDecimal("997.50"), savingsAccount.getCurrency()), savingsAccount.getBalance(), "Should apply interest once if a year has elapsed");
+        assertEquals(new Money(new BigDecimal("1002.50"), savingsAccount.getCurrency()), savingsAccount.getBalance(), "Should apply interest once if a year has elapsed");
 
         savingsAccount.setBalance(new Money(new BigDecimal("1000"), savingsAccount.getCurrency()));
         savingsAccount.chargeInterestIfApplies(Date.from(LocalDate.now().atStartOfDay().minusYears(2).toInstant(ZoneOffset.UTC)));
-        assertEquals(new Money(new BigDecimal("995.01"), savingsAccount.getCurrency()), savingsAccount.getBalance(), "Should apply interest for as many years have elapsed");
+        assertEquals(new Money(new BigDecimal("1005.01"), savingsAccount.getCurrency()), savingsAccount.getBalance(), "Should apply interest for as many years have elapsed");
     }
 }

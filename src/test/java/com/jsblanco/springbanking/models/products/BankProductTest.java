@@ -10,9 +10,10 @@ import java.util.Currency;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TestBankProduct extends BankProduct {}
 
 class BankProductTest {
+
+    private static class TestBankProduct extends BankProduct {}
 
     TestBankProduct bankProduct;
 
@@ -64,16 +65,5 @@ class BankProductTest {
 
         assertEquals(amount, bankProduct.getAmount());
         assertEquals(currency, bankProduct.getCurrency());
-    }
-
-    @DisplayName("When setting a minimum balance, it should store the Money class amount and check the currency is the same as in the account")
-    @Test
-    void setMinimumBalance() {
-        BigDecimal amount = new BigDecimal("12345.00");
-        Currency currency = Currency.getInstance("USD");
-        bankProduct.setMinimumBalance(new Money(amount, currency));
-
-        assertEquals(amount, bankProduct.getMinimumAmount(), "Minimum amount should correspond to the value passed to setMinimumAmount.");
-        assertThrows(IllegalArgumentException.class, ()->bankProduct.setMinimumBalance(new Money(amount, Currency.getInstance("EUR"))), "Minimum balance should be in the same currency as the account's current balance.");
     }
 }

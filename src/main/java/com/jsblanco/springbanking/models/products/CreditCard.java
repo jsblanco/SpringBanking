@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 
 @Entity
@@ -30,9 +31,9 @@ public class CreditCard extends BankProduct implements HasInterestRate {
     private static final BigDecimal maxCreditLimit = new BigDecimal("100000.00");
 
     public CreditCard() {
-        setLastAccess(new Date());
-        setInterestRate(defaultInterestRate);
         setCreditLimit(new Money(defaultCreditLimit));
+        setInterestRate(defaultInterestRate);
+        setLastAccess(new Date());
     }
 
     public Money getCreditLimit() {
@@ -65,10 +66,10 @@ public class CreditCard extends BankProduct implements HasInterestRate {
 
     @Override
     public void chargeInterestIfApplies(Date lastAccess) {
-        Date today = DateUtils.today();
         int overduePeriods = getOverduePeriods(lastAccess);
+        BigDecimal monthlyInterestRate = getInterestRate().divide(new BigDecimal(12), RoundingMode.HALF_EVEN);
         if (overduePeriods > 0)
-            setBalance(new Money(HasInterestRate.subtractInterest(getAmount(), interestRate, overduePeriods), getCurrency()));
+            setBalance(new Money(addInterest(getAmount(), monthlyInterestRate, overduePeriods), getCurrency()));
     }
 
     public void setCreditLimit(@NonNull BigDecimal creditLimit) {

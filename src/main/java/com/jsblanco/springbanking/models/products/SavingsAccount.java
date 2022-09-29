@@ -19,7 +19,7 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
     @NonNull
     private BigDecimal interestRate;
     @NonNull
-    private BigDecimal minimumBalance;
+    private BigDecimal minimumAmount;
     @NonNull
     private Date lastAccess;
 
@@ -47,30 +47,42 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
         super.setBalance(newBalance);
     }
 
-    public Money getMinimumBalance() {
-        return new Money(minimumBalance, getCurrency());
-    }
-
-    @Override
-    public Money applyPenaltyIfNewBalanceIsBelowMinimum(Money substractedAmount) {
-        Money finalBalance = getBalance();
-        finalBalance.decreaseAmount(substractedAmount);
-        if (finalBalance.getAmount().compareTo(getMinimumAmount()) < 0)
-            finalBalance.decreaseAmount(getPenaltyFee());
-
-        return finalBalance;
-    }
+//    @Override
+//    public Money calculateBalanceAccountingForPenalty(Money subtractedAmount) {
+//        Money finalBalance = getBalance();
+//        finalBalance.decreaseAmount(subtractedAmount);
+//        if (finalBalance.getAmount().compareTo(getMinimumAmount()) < 0)
+//            finalBalance.decreaseAmount(getPenaltyFee());
+//
+//        return finalBalance;
+//    }
 
     @Override
     public void decreaseBalance(Money deposit) {
-        super.setBalance(applyPenaltyIfNewBalanceIsBelowMinimum(deposit));
+        super.setBalance(reduceBalanceAccountingForPenalty(getBalance(), deposit, getPenaltyFee()));
+    }
+
+    @Override
+    public Money getMinimumBalance() {
+        return new Money(minimumAmount, getCurrency());
+    }
+
+    @Override
+    public void setMinimumBalance(Money balance) {
+        checkCurrency(balance.getCurrency());
+        setMinimumAmount(balance.getAmount());
+    }
+
+    @Override
+    public BigDecimal getMinimumAmount(){
+        return this.minimumAmount;
     }
 
     @Override
     public void setMinimumAmount(BigDecimal minimumAmount) {
         if (minimumAmount.compareTo(minMinimumAccount) < 0)
             throw new IllegalArgumentException("Minimum balance fall beneath " + minMinimumAccount);
-        super.setMinimumAmount(minimumAmount);
+        this. minimumAmount = minimumAmount;
     }
 
     public BigDecimal getInterestRate() {
@@ -85,10 +97,6 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
         this.interestRate = interestRate;
     }
 
-    public void setMinimumBalance(@NonNull BigDecimal minimumBalance) {
-        this.minimumBalance = minimumBalance;
-    }
-
     @Override
     public int getOverduePeriods(Date lastAccess) {
         Date today = DateUtils.today();
@@ -99,7 +107,7 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
     public void chargeInterestIfApplies(Date lastAccess) {
         int overduePeriods = getOverduePeriods(lastAccess);
         if (overduePeriods > 0)
-            setBalance(new Money(HasInterestRate.subtractInterest(getAmount(), interestRate, overduePeriods), getCurrency()));
+            setBalance(new Money(addInterest(getAmount(), interestRate, overduePeriods), getCurrency()));
     }
 
     @NonNull

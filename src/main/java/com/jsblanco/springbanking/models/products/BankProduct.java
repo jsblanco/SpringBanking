@@ -2,6 +2,7 @@ package com.jsblanco.springbanking.models.products;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.jsblanco.springbanking.models.interfaces.HasBalance;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.Money;
 import jakarta.persistence.*;
@@ -15,12 +16,11 @@ import java.util.Currency;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "product_type")
-public abstract class BankProduct {
+public abstract class BankProduct  implements HasBalance {
     @Id
     @GeneratedValue
     private Integer id;
 
-    private BigDecimal minimumAmount;
     private BigDecimal amount;
     private Currency currency = Currency.getInstance("USD");
 
@@ -59,31 +59,15 @@ public abstract class BankProduct {
         setBalance(finalBalance);
     }
 
+    @Override
     public Money getBalance() {
         return new Money(amount, currency);
     }
 
+    @Override
     public void setBalance(Money balance) {
         setAmount(balance.getAmount());
         setCurrency(balance.getCurrency());
-    }
-
-    public Money setMinimumBalance() {
-        return new Money(minimumAmount, currency);
-    }
-
-    public void setMinimumBalance(Money balance) {
-        checkCurrency(balance.getCurrency());
-        setMinimumAmount(balance.getAmount());
-        setCurrency(balance.getCurrency());
-    }
-
-    public BigDecimal getMinimumAmount() {
-        return minimumAmount;
-    }
-
-    public void setMinimumAmount(BigDecimal minimumAmount) {
-        this.minimumAmount = minimumAmount;
     }
 
     public Integer getId() {
