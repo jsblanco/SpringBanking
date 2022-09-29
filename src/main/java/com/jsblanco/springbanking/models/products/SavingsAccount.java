@@ -40,45 +40,29 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
         setInterestRate(defaultInterestRate);
     }
 
-    @Override
     public void setBalance(Money newBalance) {
         if (newBalance.getAmount().compareTo(minMinimumAccount) < 0)
             throw new IllegalArgumentException("Balance cannot fall under 100 " + getCurrency());
         super.setBalance(newBalance);
     }
 
-//    @Override
-//    public Money calculateBalanceAccountingForPenalty(Money subtractedAmount) {
-//        Money finalBalance = getBalance();
-//        finalBalance.decreaseAmount(subtractedAmount);
-//        if (finalBalance.getAmount().compareTo(getMinimumAmount()) < 0)
-//            finalBalance.decreaseAmount(getPenaltyFee());
-//
-//        return finalBalance;
-//    }
-
-    @Override
     public void decreaseBalance(Money deposit) {
         super.setBalance(reduceBalanceAccountingForPenalty(getBalance(), deposit, getPenaltyFee()));
     }
 
-    @Override
     public Money getMinimumBalance() {
         return new Money(minimumAmount, getCurrency());
     }
 
-    @Override
     public void setMinimumBalance(Money balance) {
         checkCurrency(balance.getCurrency());
         setMinimumAmount(balance.getAmount());
     }
 
-    @Override
     public BigDecimal getMinimumAmount(){
         return this.minimumAmount;
     }
 
-    @Override
     public void setMinimumAmount(BigDecimal minimumAmount) {
         if (minimumAmount.compareTo(minMinimumAccount) < 0)
             throw new IllegalArgumentException("Minimum balance fall beneath " + minMinimumAccount);
@@ -97,13 +81,11 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
         this.interestRate = interestRate;
     }
 
-    @Override
     public int getOverduePeriods(Date lastAccess) {
         Date today = DateUtils.today();
         return DateUtils.getPeriodBetweenDates(lastAccess, today).getYears();
     }
 
-    @Override
     public void chargeInterestIfApplies(Date lastAccess) {
         int overduePeriods = getOverduePeriods(lastAccess);
         if (overduePeriods > 0)

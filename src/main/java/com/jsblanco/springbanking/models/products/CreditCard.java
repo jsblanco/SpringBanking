@@ -58,13 +58,11 @@ public class CreditCard extends BankProduct implements HasInterestRate {
         this.interestRate = interestRate;
     }
 
-    @Override
     public int getOverduePeriods(Date lastAccess) {
         Date today = DateUtils.today();
         return DateUtils.getPeriodBetweenDates(lastAccess, today).getMonths();
     }
 
-    @Override
     public void chargeInterestIfApplies(Date lastAccess) {
         int overduePeriods = getOverduePeriods(lastAccess);
         BigDecimal monthlyInterestRate = getInterestRate().divide(new BigDecimal(12), RoundingMode.HALF_EVEN);

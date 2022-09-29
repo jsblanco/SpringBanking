@@ -20,28 +20,23 @@ public class CheckingAccount extends Account implements HasMinimumBalance, HasMa
     @NonNull
     private Date lastAccess;
 
-    @Override
     public void decreaseBalance(Money deposit) {
         super.setBalance(reduceBalanceAccountingForPenalty(getBalance(), deposit, penaltyFee));
     }
 
-    @Override
     public Money getMinimumBalance() {
         return new Money(minimumAmount, getCurrency());
     }
 
-    @Override
     public void setMinimumBalance(Money balance) {
         checkCurrency(balance.getCurrency());
         setMinimumAmount(balance.getAmount());
     }
 
-    @Override
     public BigDecimal getMinimumAmount() {
         return this.minimumAmount;
     }
 
-    @Override
     public void setMinimumAmount(BigDecimal amount) {
         this.minimumAmount = amount;
     }
@@ -55,13 +50,12 @@ public class CheckingAccount extends Account implements HasMinimumBalance, HasMa
         this.monthlyMaintenanceFee = monthlyMaintenanceFee.getAmount();
     }
 
-    @Override
     public int getOverduePeriods(Date lastAccess) {
         Date today = DateUtils.today();
-        return DateUtils.getPeriodBetweenDates(lastAccess, today).getMonths();
+        return DateUtils.getPeriodBetweenDates(lastAccess, today).getMonths()
+                + (DateUtils.getPeriodBetweenDates(lastAccess, today).getYears() * 12);
     }
 
-    @Override
     public void chargeMaintenanceIfApplies(Date lastAccess) {
         int overduePeriods = getOverduePeriods(lastAccess);
         if (overduePeriods > 0)

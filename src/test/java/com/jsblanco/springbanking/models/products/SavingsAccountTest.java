@@ -23,7 +23,7 @@ class SavingsAccountTest {
 
     @DisplayName("Should apply a penalty fee only when balance decreases to drop below minimum")
     @Test
-    void applyPenaltyIfNewBalanceIsBelowMinimum() {
+    void decreaseBalance() {
         Money belowMinimumBalance = new Money(new BigDecimal("1000"));
         savingsAccount.setMinimumBalance(belowMinimumBalance);
         savingsAccount.setBalance(belowMinimumBalance);
@@ -50,7 +50,7 @@ class SavingsAccountTest {
         assertThrows(IllegalArgumentException.class, () -> savingsAccount.setInterestRate(new BigDecimal("-0.1")), "Should not set interest rates lower than 0");
     }
 
-    @DisplayName("Should charge interest proportional to the years elapsed since last access")
+    @DisplayName("Should add interest proportional to the years elapsed since last access")
     @Test
     void mustInterestBeCharged() {
         savingsAccount.setBalance(new Money(new BigDecimal("1000"), savingsAccount.getCurrency()));

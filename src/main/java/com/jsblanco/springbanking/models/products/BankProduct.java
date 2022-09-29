@@ -59,12 +59,10 @@ public abstract class BankProduct  implements HasBalance {
         setBalance(finalBalance);
     }
 
-    @Override
     public Money getBalance() {
         return new Money(amount, currency);
     }
 
-    @Override
     public void setBalance(Money balance) {
         setAmount(balance.getAmount());
         setCurrency(balance.getCurrency());
