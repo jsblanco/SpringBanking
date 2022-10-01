@@ -5,9 +5,10 @@ import com.jsblanco.springbanking.models.products.CheckingAccount;
 import com.jsblanco.springbanking.models.products.StudentCheckingAccount;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.DateUtils;
-import com.jsblanco.springbanking.repositories.products.CheckingAccountRepository;
-import com.jsblanco.springbanking.repositories.products.SavingsAccountRepository;
-import com.jsblanco.springbanking.repositories.products.StudentCheckingAccountRepository;
+import com.jsblanco.springbanking.services.products.interfaces.AccountService;
+import com.jsblanco.springbanking.services.products.interfaces.CheckingAccountService;
+import com.jsblanco.springbanking.services.products.interfaces.SavingsAccountService;
+import com.jsblanco.springbanking.services.products.interfaces.StudentCheckingAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,24 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     StudentCheckingAccountService studentCheckingAccountService;
 
+    @Override
+    public Account createCheckingAccount(CheckingAccount account) {
+        LocalDate birthday = DateUtils.getDateLocalValue(account.getPrimaryOwner().getBirthDay());
+        if (Period.between(birthday, LocalDate.now()).getYears() < 24)
+            return this.studentCheckingAccountService.save(new StudentCheckingAccount(account));
+        return this.checkingAccountService.save(account);
+    }
+
+    @Override
+    public List<Account> getAll() {
+        Set<Account> accounts = new HashSet<>();
+
+        accounts.addAll(checkingAccountService.getAll());
+        accounts.addAll(studentCheckingAccountService.getAll());
+        accounts.addAll(savingsAccountService.getAll());
+
+        return accounts.stream().toList();
+    }
 
     @Override
     public List<Account> getByOwner(AccountHolder owner) {
@@ -36,14 +55,4 @@ public class AccountServiceImpl implements AccountService {
 
         return accounts.stream().toList();
     }
-
-    @Override
-    public Account createCheckingAccount(CheckingAccount account) {
-        LocalDate birthday = DateUtils.getDateLocalValue(account.getPrimaryOwner().getBirthDay());
-        if (Period.between(birthday, LocalDate.now()).getYears() < 24)
-            return this.studentCheckingAccountService.save(new StudentCheckingAccount(account));
-        return this.checkingAccountService.save(account);
-    }
-
-
 }

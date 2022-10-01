@@ -7,6 +7,8 @@ import com.jsblanco.springbanking.models.util.Money;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
@@ -17,8 +19,11 @@ import java.util.Date;
 public class SavingsAccount extends Account implements HasInterestRate, HasMinimumBalance {
 
     @NonNull
+    @DecimalMax(value="0.50")
+    @DecimalMin(value="0.00")
     private BigDecimal interestRate;
     @NonNull
+    @DecimalMin(value="100.00")
     private BigDecimal minimumAmount;
     @NonNull
     private Date lastAccess;

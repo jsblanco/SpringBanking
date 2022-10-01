@@ -3,7 +3,7 @@ package com.jsblanco.springbanking.models.users;
 import jakarta.persistence.Entity;
 
 @Entity
-public class ThirdPartyUser extends User {
+public class ThirdParty extends User {
     private String hashedKey;
 
     public String getHashedKey() {

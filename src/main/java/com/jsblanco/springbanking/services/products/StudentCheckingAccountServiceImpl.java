@@ -3,6 +3,7 @@ package com.jsblanco.springbanking.services.products;
 import com.jsblanco.springbanking.models.products.StudentCheckingAccount;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.repositories.products.StudentCheckingAccountRepository;
+import com.jsblanco.springbanking.services.products.interfaces.StudentCheckingAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

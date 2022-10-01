@@ -1,10 +1,9 @@
 package com.jsblanco.springbanking.services.products;
 
-import com.jsblanco.springbanking.models.products.CheckingAccount;
 import com.jsblanco.springbanking.models.products.SavingsAccount;
 import com.jsblanco.springbanking.models.users.AccountHolder;
-import com.jsblanco.springbanking.repositories.products.CheckingAccountRepository;
 import com.jsblanco.springbanking.repositories.products.SavingsAccountRepository;
+import com.jsblanco.springbanking.services.products.interfaces.SavingsAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

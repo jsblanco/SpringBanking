@@ -3,6 +3,7 @@ package com.jsblanco.springbanking.services.products;
 import com.jsblanco.springbanking.models.products.CreditCard;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.repositories.products.CreditCardRepository;
+import com.jsblanco.springbanking.services.products.interfaces.CreditCardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

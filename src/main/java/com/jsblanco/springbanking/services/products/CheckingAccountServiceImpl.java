@@ -1,15 +1,12 @@
 package com.jsblanco.springbanking.services.products;
 
 import com.jsblanco.springbanking.models.products.CheckingAccount;
-import com.jsblanco.springbanking.models.products.SavingsAccount;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.repositories.products.CheckingAccountRepository;
-import com.jsblanco.springbanking.repositories.products.StudentCheckingAccountRepository;
-import org.hibernate.annotations.Check;
+import com.jsblanco.springbanking.services.products.interfaces.CheckingAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
