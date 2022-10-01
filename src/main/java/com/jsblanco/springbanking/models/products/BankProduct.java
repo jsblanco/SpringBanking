@@ -16,7 +16,7 @@ import java.util.Currency;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "product_type")
-public abstract class BankProduct  implements HasBalance {
+public abstract class BankProduct implements HasBalance {
     @Id
     @GeneratedValue
     private Integer id;
@@ -98,6 +98,7 @@ public abstract class BankProduct  implements HasBalance {
 
     public void setPrimaryOwner(@NonNull AccountHolder primaryOwner) {
         this.primaryOwner = primaryOwner;
+        if (secondaryOwner.equals(this.primaryOwner)) setSecondaryOwner(null);
     }
 
     @Nullable
@@ -106,7 +107,7 @@ public abstract class BankProduct  implements HasBalance {
     }
 
     public void setSecondaryOwner(@Nullable AccountHolder secondaryOwner) {
-        this.secondaryOwner = secondaryOwner;
+        if (secondaryOwner == null || !secondaryOwner.equals(this.primaryOwner)) this.secondaryOwner = secondaryOwner;
     }
 
     @NonNull
