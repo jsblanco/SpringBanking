@@ -86,11 +86,6 @@ public class CreditCard extends BankProduct implements HasInterestRate {
         this.lastAccess = DateUtils.today();
     }
 
-    public BigDecimal getMinInterestRate() {
-        return minInterestRate;
-    }
-
-
     public BigDecimal getMaxCreditLimit() {
         return maxCreditLimit;
     }

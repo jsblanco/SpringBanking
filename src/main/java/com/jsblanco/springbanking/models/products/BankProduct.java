@@ -20,7 +20,6 @@ public abstract class BankProduct  implements HasBalance {
     @Id
     @GeneratedValue
     private Integer id;
-
     private BigDecimal amount;
     private Currency currency = Currency.getInstance("USD");
 
@@ -43,6 +42,15 @@ public abstract class BankProduct  implements HasBalance {
             throw new IllegalArgumentException("This account used " + getCurrency() + ". Currency must be converted to " + getCurrency() + " before making transactions");
     }
 
+    public Money getBalance() {
+        return new Money(amount, currency);
+    }
+
+    public void setBalance(Money balance) {
+        setAmount(balance.getAmount());
+        setCurrency(balance.getCurrency());
+    }
+
     public void increaseBalance(Money deposit) {
         checkCurrency(deposit.getCurrency());
 
@@ -57,15 +65,6 @@ public abstract class BankProduct  implements HasBalance {
         Money finalBalance = getBalance();
         finalBalance.decreaseAmount(deposit);
         setBalance(finalBalance);
-    }
-
-    public Money getBalance() {
-        return new Money(amount, currency);
-    }
-
-    public void setBalance(Money balance) {
-        setAmount(balance.getAmount());
-        setCurrency(balance.getCurrency());
     }
 
     public Integer getId() {

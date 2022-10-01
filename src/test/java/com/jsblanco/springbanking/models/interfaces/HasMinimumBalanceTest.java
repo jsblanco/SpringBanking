@@ -17,7 +17,7 @@ class HasMinimumBalanceTest {
 
     @BeforeEach
     void setUp() {
-        when(product.getMinimumAmount()).thenReturn(new BigDecimal(600));
+        when(product.getMinimumBalance()).thenReturn(new Money(new BigDecimal(600)));
     }
 
     @DisplayName("Should only charge the penalty fee if the balance falls below minimum")

@@ -1,5 +1,6 @@
 package com.jsblanco.springbanking.models.products;
 
+import com.jsblanco.springbanking.models.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Money;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,5 +63,14 @@ class CreditCardTest {
         creditCard.setBalance(new Money(new BigDecimal("1000"), creditCard.getCurrency()));
         creditCard.chargeInterestIfApplies(Date.from(LocalDate.now().atStartOfDay().minusMonths(2).toInstant(ZoneOffset.UTC)));
         assertEquals(new Money(new BigDecimal("1020.1"), creditCard.getCurrency()), creditCard.getBalance(), "Should apply interest for as many months have elapsed");
+    }
+
+    @DisplayName("Should use provided date to apply any pertinent balance changes and then set current date as last access")
+    @Test
+    void setLastAccess() {
+        creditCard.setBalance(new Money(new BigDecimal("1000"), creditCard.getCurrency()));
+        creditCard.setLastAccess(Date.from(LocalDate.now().atStartOfDay().minusMonths(1).toInstant(ZoneOffset.UTC)));
+        assertEquals(new Money(new BigDecimal("1010"), creditCard.getCurrency()), creditCard.getBalance(), "Should apply interest once if a month has elapsed");
+        assertEquals(creditCard.getLastAccess(), DateUtils.today());
     }
 }

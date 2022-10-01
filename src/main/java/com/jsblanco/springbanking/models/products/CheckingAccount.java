@@ -14,11 +14,12 @@ import java.util.Date;
 @DiscriminatorValue("checking_account")
 public class CheckingAccount extends Account implements HasMinimumBalance, HasMaintenanceFee {
     @NonNull
-    private BigDecimal minimumAmount;
-    @NonNull
-    private BigDecimal monthlyMaintenanceFee;
-    @NonNull
     private Date lastAccess;
+
+    @Transient
+    private final BigDecimal monthlyMaintenanceFee = new BigDecimal(12);
+    @Transient
+    private final BigDecimal minimumAmount = new BigDecimal(250);
 
     public void decreaseBalance(Money deposit) {
         super.setBalance(reduceBalanceAccountingForPenalty(getBalance(), deposit, penaltyFee));
@@ -28,26 +29,8 @@ public class CheckingAccount extends Account implements HasMinimumBalance, HasMa
         return new Money(minimumAmount, getCurrency());
     }
 
-    public void setMinimumBalance(Money balance) {
-        checkCurrency(balance.getCurrency());
-        setMinimumAmount(balance.getAmount());
-    }
-
-    public BigDecimal getMinimumAmount() {
-        return this.minimumAmount;
-    }
-
-    public void setMinimumAmount(BigDecimal amount) {
-        this.minimumAmount = amount;
-    }
-
     public Money getMonthlyMaintenanceFee() {
         return new Money(monthlyMaintenanceFee, getCurrency());
-    }
-
-    public void setMonthlyMaintenanceFee(Money monthlyMaintenanceFee) {
-        checkCurrency(monthlyMaintenanceFee.getCurrency());
-        this.monthlyMaintenanceFee = monthlyMaintenanceFee.getAmount();
     }
 
     public int getOverduePeriods(Date lastAccess) {
@@ -59,7 +42,7 @@ public class CheckingAccount extends Account implements HasMinimumBalance, HasMa
     public void chargeMaintenanceIfApplies(Date lastAccess) {
         int overduePeriods = getOverduePeriods(lastAccess);
         if (overduePeriods > 0)
-            setBalance(new Money(subtractMaintenance(getAmount(), monthlyMaintenanceFee, overduePeriods), getCurrency()));
+            setBalance(new Money(subtractMaintenance(monthlyMaintenanceFee, overduePeriods), getCurrency()));
     }
 
     @NonNull
@@ -70,9 +53,5 @@ public class CheckingAccount extends Account implements HasMinimumBalance, HasMa
     public void setLastAccess(@NonNull Date lastAccess) {
         chargeMaintenanceIfApplies(lastAccess);
         this.lastAccess = DateUtils.today();
-    }
-
-    public void setMonthlyMaintenanceFee(@NonNull BigDecimal monthlyMaintenanceFee) {
-        this.monthlyMaintenanceFee = monthlyMaintenanceFee;
     }
 }

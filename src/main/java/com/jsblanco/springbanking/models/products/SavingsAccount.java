@@ -59,10 +59,6 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
         setMinimumAmount(balance.getAmount());
     }
 
-    public BigDecimal getMinimumAmount(){
-        return this.minimumAmount;
-    }
-
     public void setMinimumAmount(BigDecimal minimumAmount) {
         if (minimumAmount.compareTo(minMinimumAccount) < 0)
             throw new IllegalArgumentException("Minimum balance fall beneath " + minMinimumAccount);
@@ -100,22 +96,6 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
     public void setLastAccess(@NonNull Date lastAccess) {
         chargeInterestIfApplies(lastAccess);
         this.lastAccess = DateUtils.today();
-    }
-
-    public BigDecimal getMaxInterestRate() {
-        return maxInterestRate;
-    }
-
-    public BigDecimal getMinInterestRate() {
-        return minInterestRate;
-    }
-
-    public BigDecimal getMinMinimumAccount() {
-        return minMinimumAccount;
-    }
-
-    public BigDecimal getDefaultMinimumAmount() {
-        return defaultMinimumAmount;
     }
 
     public BigDecimal getDefaultInterestRate() {
