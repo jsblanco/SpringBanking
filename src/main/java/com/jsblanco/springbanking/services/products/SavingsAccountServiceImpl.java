@@ -5,21 +5,26 @@ import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.repositories.products.SavingsAccountRepository;
 import com.jsblanco.springbanking.services.products.interfaces.SavingsAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
 public class SavingsAccountServiceImpl implements SavingsAccountService {
-
     @Autowired
     SavingsAccountRepository savingsAccountRepository;
 
     @Override
     public SavingsAccount getById(Integer id) {
-        return this.savingsAccountRepository.getSavingsAccountById(id);
+        Optional<SavingsAccount> savingsAccount = this.savingsAccountRepository.findById(id);
+        if (savingsAccount.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
+        return savingsAccount.get();
     }
 
     @Override
@@ -29,16 +34,18 @@ public class SavingsAccountServiceImpl implements SavingsAccountService {
 
     @Override
     public SavingsAccount update(SavingsAccount account) {
-        if (this.savingsAccountRepository.getSavingsAccountById(account.getId()) == null)
-            throw new IllegalArgumentException("No such account exists in the database");
+        Optional<SavingsAccount> savingsAccount = this.savingsAccountRepository.findById(account.getId());
+        if (savingsAccount.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
         return this.savingsAccountRepository.save(account);
     }
 
     @Override
-    public void delete(SavingsAccount account) {
-        if (this.savingsAccountRepository.getSavingsAccountById(account.getId()) == null)
-            throw new IllegalArgumentException("No such account exists in the database");
-        this.savingsAccountRepository.delete(account);
+    public void delete(Integer id) {
+        Optional<SavingsAccount> savingsAccount = this.savingsAccountRepository.findById(id);
+        if (savingsAccount.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
+        this.savingsAccountRepository.delete(savingsAccount.get());
     }
 
     @Override

@@ -2,8 +2,10 @@ package com.jsblanco.springbanking.models.products;
 
 import com.jsblanco.springbanking.models.interfaces.HasMaintenanceFee;
 import com.jsblanco.springbanking.models.interfaces.HasMinimumBalance;
+import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Money;
+import com.jsblanco.springbanking.models.util.Status;
 import jakarta.persistence.*;
 import org.springframework.lang.NonNull;
 
@@ -13,13 +15,21 @@ import java.util.Date;
 @Entity
 @DiscriminatorValue("checking_account")
 public class CheckingAccount extends Account implements HasMinimumBalance, HasMaintenanceFee {
+
     @NonNull
     private Date lastAccess;
+    @NonNull
+    private final BigDecimal monthlyMaintenanceFee = new BigDecimal("12.00");
+    @NonNull
+    private final BigDecimal minimumAmount = new BigDecimal("250.00");
 
-    @Transient
-    private final BigDecimal monthlyMaintenanceFee = new BigDecimal(12);
-    @Transient
-    private final BigDecimal minimumAmount = new BigDecimal(250);
+    public CheckingAccount() {
+    }
+
+    public CheckingAccount(Integer id, BigDecimal amount, AccountHolder primaryOwner, String secretKey, Date creationDate, Status status) {
+        super(id, amount, primaryOwner, secretKey, creationDate, status);
+        this.lastAccess = DateUtils.today();
+    }
 
     public void decreaseBalance(Money deposit) {
         super.setBalance(reduceBalanceAccountingForPenalty(getBalance(), deposit, penaltyFee));
@@ -53,5 +63,24 @@ public class CheckingAccount extends Account implements HasMinimumBalance, HasMa
     public void setLastAccess(@NonNull Date lastAccess) {
         chargeMaintenanceIfApplies(lastAccess);
         this.lastAccess = DateUtils.today();
+    }
+
+    @Override
+    public String toString() {
+        return super.toString()
+                + lastAccess.getTime()
+                + monthlyMaintenanceFee
+                + minimumAmount;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof CheckingAccount account) {
+            return super.equals(obj)
+                    && lastAccess.equals(account.getLastAccess())
+                    && monthlyMaintenanceFee.equals(account.getMonthlyMaintenanceFee().getAmount())
+                    && minimumAmount.equals(account.getMinimumBalance().getAmount());
+        }
+        return false;
     }
 }

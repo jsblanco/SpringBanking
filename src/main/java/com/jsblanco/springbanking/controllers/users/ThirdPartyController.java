@@ -16,7 +16,7 @@ public class ThirdPartyController {
 
     @GetMapping("/thirdparty/")
     @ResponseStatus(HttpStatus.OK)
-    public List<ThirdParty> getAllThirdPartys() {
+    public List<ThirdParty> getAllThirdParties() {
         return this.thirdPartyService.getAll();
     }
 
@@ -38,9 +38,9 @@ public class ThirdPartyController {
         return this.thirdPartyService.update(thirdParty);
     }
 
-    @DeleteMapping("/thirdparty/")
+    @DeleteMapping("/thirdparty/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteThirdParty(@RequestBody ThirdParty thirdParty) {
-        this.thirdPartyService.delete(thirdParty);
+    public void deleteThirdParty(@PathVariable Integer id) {
+        this.thirdPartyService.delete(id);
     }
 }

@@ -1,7 +1,6 @@
 package com.jsblanco.springbanking.models.users;
 
 import com.jsblanco.springbanking.models.util.Address;
-import com.jsblanco.springbanking.models.products.BankProduct;
 import jakarta.persistence.*;
 import org.springframework.lang.NonNull;
 
@@ -9,6 +8,7 @@ import java.util.*;
 
 @Entity
 public class AccountHolder extends User {
+    @NonNull
     private Date birthDay;
 
     @Embedded
@@ -30,18 +30,14 @@ public class AccountHolder extends User {
     })
     private Address mailingAddress;
 
-    @OneToMany(mappedBy = "primaryOwner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<BankProduct> primaryOwnedProducts;
 
-    @OneToMany(mappedBy = "secondaryOwner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<BankProduct> secondaryOwnedProducts;
+    public AccountHolder() {
+    }
 
-    public Map<BankProduct, Integer> getProducts() {
-        HashMap<BankProduct, Integer> productMap = new HashMap<>();
-        primaryOwnedProducts.forEach((product) -> productMap.put(product, product.getId()));
-        secondaryOwnedProducts.forEach((product) -> productMap.put(product, product.getId()));
-
-        return productMap;
+    public AccountHolder( String name, @NonNull Date birthDay, @NonNull Address primaryAddress) {
+        super(name);
+        this.birthDay = birthDay;
+        this.primaryAddress = primaryAddress;
     }
 
     public Date getBirthDay() {
@@ -69,19 +65,17 @@ public class AccountHolder extends User {
         this.mailingAddress = mailingAddress;
     }
 
-    public List<BankProduct> getPrimaryOwnedProducts() {
-        return primaryOwnedProducts;
+    @Override
+    public String toString() {
+        return super.toString() + birthDay.getTime() + primaryAddress + (mailingAddress == null ? "" : mailingAddress);
     }
 
-    public void setPrimaryOwnedProducts(List<BankProduct> primaryOwnedProducts) {
-        this.primaryOwnedProducts = primaryOwnedProducts;
-    }
-
-    public List<BankProduct> getSecondaryOwnedProducts() {
-        return secondaryOwnedProducts;
-    }
-
-    public void setSecondaryOwnedProducts(List<BankProduct> secondaryOwnedProducts) {
-        this.secondaryOwnedProducts = secondaryOwnedProducts;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof AccountHolder user) {
+            return super.equals(user)
+                    && birthDay.equals(user.getBirthDay());
+        }
+        return false;
     }
 }

@@ -5,21 +5,26 @@ import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.repositories.products.StudentCheckingAccountRepository;
 import com.jsblanco.springbanking.services.products.interfaces.StudentCheckingAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
 public class StudentCheckingAccountServiceImpl implements StudentCheckingAccountService {
-
     @Autowired
     StudentCheckingAccountRepository studentCheckingAccountRepository;
 
     @Override
     public StudentCheckingAccount getById(Integer id) {
-        return this.studentCheckingAccountRepository.getStudentCheckingAccountById(id);
+        Optional<StudentCheckingAccount> studentCheckingAccount = this.studentCheckingAccountRepository.findById(id);
+        if (studentCheckingAccount.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
+        return studentCheckingAccount.get();
     }
 
     @Override
@@ -29,16 +34,18 @@ public class StudentCheckingAccountServiceImpl implements StudentCheckingAccount
 
     @Override
     public StudentCheckingAccount update(StudentCheckingAccount account) {
-        if (this.studentCheckingAccountRepository.getStudentCheckingAccountById(account.getId()) == null)
-            throw new IllegalArgumentException("No such account exists in the database");
+        Optional<StudentCheckingAccount> studentCheckingAccount = this.studentCheckingAccountRepository.findById(account.getId());
+        if (studentCheckingAccount.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
         return this.studentCheckingAccountRepository.save(account);
     }
 
     @Override
-    public void delete(StudentCheckingAccount account) {
-        if (this.studentCheckingAccountRepository.getStudentCheckingAccountById(account.getId()) == null)
-            throw new IllegalArgumentException("No such account exists in the database");
-        this.studentCheckingAccountRepository.delete(account);
+    public void delete(Integer id) {
+        Optional<StudentCheckingAccount> studentCheckingAccount = this.studentCheckingAccountRepository.findById(id);
+        if (studentCheckingAccount.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
+        this.studentCheckingAccountRepository.delete(studentCheckingAccount.get());
     }
 
     @Override

@@ -38,9 +38,9 @@ public class AdminController {
         return this.adminService.update(admin);
     }
 
-    @DeleteMapping("/admin/")
+    @DeleteMapping("/admin/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteAdmin(@RequestBody Admin admin) {
-        this.adminService.delete(admin);
+    public void deleteAdmin(@PathVariable Integer id) {
+        this.adminService.delete(id);
     }
 }

@@ -14,6 +14,16 @@ public class Address {
     @NonNull
     private String country;
 
+    public Address() {
+    }
+
+    public Address(@NonNull String door, @NonNull String postalCode, @NonNull String city, @NonNull String country) {
+        this.door = door;
+        this.postalCode = postalCode;
+        this.city = city;
+        this.country = country;
+    }
+
     @NonNull
     public String getDoor() {
         return door;
@@ -48,5 +58,26 @@ public class Address {
 
     public void setCountry(@NonNull String country) {
         this.country = country;
+    }
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                "door='" + door + '\'' +
+                ", postalCode='" + postalCode + '\'' +
+                ", city='" + city + '\'' +
+                ", country='" + country + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+
+        if (obj instanceof Address address)
+            return postalCode.equals(address.getPostalCode())
+                    && city.equals(address.getCity())
+                    && country.equals(address.getCountry())
+                    && door.equals(address.getDoor());
+        return false;
     }
 }

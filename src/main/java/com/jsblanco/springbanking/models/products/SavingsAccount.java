@@ -2,13 +2,16 @@ package com.jsblanco.springbanking.models.products;
 
 import com.jsblanco.springbanking.models.interfaces.HasInterestRate;
 import com.jsblanco.springbanking.models.interfaces.HasMinimumBalance;
+import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Money;
+import com.jsblanco.springbanking.models.util.Status;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
@@ -19,8 +22,9 @@ import java.util.Date;
 public class SavingsAccount extends Account implements HasInterestRate, HasMinimumBalance {
 
     @NonNull
-    @DecimalMax(value="0.50")
-    @DecimalMin(value="0.00")
+    @DecimalMax(value="0.5000")
+    @DecimalMin(value="0.0001")
+    @Digits(integer = 1, fraction = 4)
     private BigDecimal interestRate;
     @NonNull
     @DecimalMin(value="100.00")
@@ -29,15 +33,9 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
     private Date lastAccess;
 
     @Transient
-    private static final BigDecimal defaultMinimumAmount = new BigDecimal("1000");
+    private static final BigDecimal defaultMinimumAmount = new BigDecimal("1000.00");
     @Transient
     private static final BigDecimal defaultInterestRate = new BigDecimal("0.0025");
-    @Transient
-    private static final BigDecimal maxInterestRate = new BigDecimal("0.5");
-    @Transient
-    private static final BigDecimal minInterestRate = new BigDecimal("0");
-    @Transient
-    private static final BigDecimal minMinimumAccount = new BigDecimal("100");
 
     public SavingsAccount() {
         setLastAccess(new Date());
@@ -45,9 +43,14 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
         setInterestRate(defaultInterestRate);
     }
 
+    public SavingsAccount(Integer id, BigDecimal amount, AccountHolder primaryOwner, String secretKey, Date creationDate, Status status) {
+        super(id, amount, primaryOwner, secretKey, creationDate, status);
+        setLastAccess(new Date());
+        setMinimumAmount(defaultMinimumAmount);
+        setInterestRate(defaultInterestRate);
+    }
+
     public void setBalance(Money newBalance) {
-        if (newBalance.getAmount().compareTo(minMinimumAccount) < 0)
-            throw new IllegalArgumentException("Balance cannot fall under 100 " + getCurrency());
         super.setBalance(newBalance);
     }
 
@@ -65,8 +68,6 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
     }
 
     public void setMinimumAmount(BigDecimal minimumAmount) {
-        if (minimumAmount.compareTo(minMinimumAccount) < 0)
-            throw new IllegalArgumentException("Minimum balance fall beneath " + minMinimumAccount);
         this. minimumAmount = minimumAmount;
     }
 
@@ -75,10 +76,6 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
     }
 
     public void setInterestRate(BigDecimal interestRate) {
-        if (interestRate.compareTo(maxInterestRate) > 0)
-            throw new IllegalArgumentException("The maximum interest rate for savings accounts is " + maxInterestRate);
-        if (interestRate.compareTo(minInterestRate) < 0)
-            throw new IllegalArgumentException("Interest rate cannot fall under " + minInterestRate);
         this.interestRate = interestRate;
     }
 
@@ -105,5 +102,25 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
 
     public BigDecimal getDefaultInterestRate() {
         return defaultInterestRate;
+    }
+
+
+    @Override
+    public String toString() {
+        return super.toString()
+                + lastAccess.getTime()
+                + minimumAmount
+                + interestRate;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SavingsAccount account) {
+            return super.equals(obj)
+                    && lastAccess.equals(account.getLastAccess())
+                    && interestRate.equals(account.getInterestRate())
+                    && minimumAmount.equals(account.getMinimumBalance().getAmount());
+        }
+        return false;
     }
 }

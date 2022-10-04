@@ -38,9 +38,9 @@ public class SavingsAccountController {
         return this.savingsAccountService.update(account);
     }
 
-    @DeleteMapping("/savings/")
+    @DeleteMapping("/savings/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteSavingsAccounts(@RequestBody SavingsAccount account) {
-        this.savingsAccountService.delete(account);
+    public void deleteSavingsAccounts(@PathVariable Integer id) {
+        this.savingsAccountService.delete(id);
     }
 }

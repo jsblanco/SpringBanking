@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 public abstract class DateUtils {
 
@@ -19,6 +21,18 @@ public abstract class DateUtils {
     }
 
     public static Date today(){
-        return Date.from(LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC));
+        return round(Date.from(LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)));
+    }
+
+    public static Date round(Date date) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        int deltaMin = calendar.get(Calendar.SECOND)/30;
+
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.add(Calendar.MINUTE, deltaMin);
+
+        return calendar.getTime();
     }
 }

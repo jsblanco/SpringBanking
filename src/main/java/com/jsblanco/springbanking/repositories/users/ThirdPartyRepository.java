@@ -7,5 +7,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ThirdPartyRepository extends JpaRepository<ThirdParty, Integer> {
-    ThirdParty getThirdPartyById(Integer id);
 }

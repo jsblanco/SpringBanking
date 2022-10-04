@@ -5,21 +5,26 @@ import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.repositories.products.CreditCardRepository;
 import com.jsblanco.springbanking.services.products.interfaces.CreditCardService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
 public class CreditCardServiceImpl implements CreditCardService {
-
     @Autowired
     CreditCardRepository creditCardRepository;
 
     @Override
     public CreditCard getById(Integer id) {
-        return this.creditCardRepository.getCreditCardById(id);
+        Optional<CreditCard> creditCard = this.creditCardRepository.findById(id);
+        if (creditCard.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
+        return creditCard.get();
     }
 
     @Override
@@ -29,16 +34,18 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     @Override
     public CreditCard update(CreditCard account) {
-        if (this.creditCardRepository.getCreditCardById(account.getId()) == null)
-            throw new IllegalArgumentException("No such account exists in the database");
+        Optional<CreditCard> creditCard = this.creditCardRepository.findById(account.getId());
+        if (creditCard.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
         return this.creditCardRepository.save(account);
     }
 
     @Override
-    public void delete(CreditCard account) {
-        if (this.creditCardRepository.getCreditCardById(account.getId()) == null)
-            throw new IllegalArgumentException("No such account exists in the database");
-        this.creditCardRepository.delete(account);
+    public void delete(Integer id) {
+        Optional<CreditCard> creditCard = this.creditCardRepository.findById(id);
+        if (creditCard.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
+        this.creditCardRepository.delete(creditCard.get());
     }
 
     @Override

@@ -39,9 +39,9 @@ public class AccountHolderController {
         return this.accountHolderService.update(accountHolder);
     }
 
-    @DeleteMapping("/holder/")
+    @DeleteMapping("/holder/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteAccountHolder(@RequestBody AccountHolder accountHolder) {
-        this.accountHolderService.delete(accountHolder);
+    public void deleteAccountHolder(@PathVariable Integer id) {
+        this.accountHolderService.delete(id);
     }
 }

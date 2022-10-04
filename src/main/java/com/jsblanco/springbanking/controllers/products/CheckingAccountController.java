@@ -43,9 +43,9 @@ public class CheckingAccountController {
         return this.checkingAccountService.update(account);
     }
 
-    @DeleteMapping("/checking/")
+    @DeleteMapping("/checking/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteCheckingAccounts(@RequestBody CheckingAccount account) {
-        this.checkingAccountService.delete(account);
+    public void deleteCheckingAccounts(@PathVariable Integer id) {
+        this.checkingAccountService.delete(id);
     }
 }

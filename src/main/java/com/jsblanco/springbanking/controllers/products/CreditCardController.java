@@ -38,9 +38,9 @@ public class CreditCardController {
         return this.creditCardService.update(card);
     }
 
-    @DeleteMapping("/card/")
+    @DeleteMapping("/card/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteCreditCards(@RequestBody CreditCard card) {
-        this.creditCardService.delete(card);
+    public void deleteCreditCards(@PathVariable Integer id) {
+        this.creditCardService.delete(id);
     }
 }

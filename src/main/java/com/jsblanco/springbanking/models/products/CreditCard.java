@@ -1,6 +1,7 @@
 package com.jsblanco.springbanking.models.products;
 
 import com.jsblanco.springbanking.models.interfaces.HasInterestRate;
+import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Money;
 import jakarta.persistence.*;
@@ -31,6 +32,13 @@ public class CreditCard extends BankProduct implements HasInterestRate {
     private static final BigDecimal maxCreditLimit = new BigDecimal("100000.00");
 
     public CreditCard() {
+        setCreditLimit(new Money(defaultCreditLimit));
+        setInterestRate(defaultInterestRate);
+        setLastAccess(new Date());
+    }
+
+    public CreditCard(Integer id, BigDecimal amount, AccountHolder primaryOwner) {
+        super(id, amount, primaryOwner);
         setCreditLimit(new Money(defaultCreditLimit));
         setInterestRate(defaultInterestRate);
         setLastAccess(new Date());
@@ -96,5 +104,24 @@ public class CreditCard extends BankProduct implements HasInterestRate {
 
     public BigDecimal getDefaultCreditLimit() {
         return defaultCreditLimit;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString()
+                + creditLimit
+                + interestRate
+                + lastAccess.getTime();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof CreditCard card) {
+            return super.equals(obj)
+                    && creditLimit.equals(card.getCreditLimit().getAmount())
+                    && interestRate.equals(card.getInterestRate())
+                    && lastAccess.equals(card.lastAccess);
+        }
+        return false;
     }
 }

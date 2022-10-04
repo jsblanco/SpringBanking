@@ -5,21 +5,26 @@ import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.repositories.products.CheckingAccountRepository;
 import com.jsblanco.springbanking.services.products.interfaces.CheckingAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
 public class CheckingAccountServiceImpl implements CheckingAccountService {
-
     @Autowired
     CheckingAccountRepository checkingAccountRepository;
 
     @Override
     public CheckingAccount getById(Integer id) {
-        return this.checkingAccountRepository.getCheckingAccountById(id);
+        Optional<CheckingAccount> checkingAccount = this.checkingAccountRepository.findById(id);
+        if (checkingAccount.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
+        return checkingAccount.get();
     }
 
     @Override
@@ -29,16 +34,18 @@ public class CheckingAccountServiceImpl implements CheckingAccountService {
 
     @Override
     public CheckingAccount update(CheckingAccount account) {
-        if (this.checkingAccountRepository.getCheckingAccountById(account.getId()) == null)
-            throw new IllegalArgumentException("No such account exists in the database");
+        Optional<CheckingAccount> checkingAccount = this.checkingAccountRepository.findById(account.getId());
+        if (checkingAccount.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
         return this.checkingAccountRepository.save(account);
     }
 
     @Override
-    public void delete(CheckingAccount account) {
-        if (this.checkingAccountRepository.getCheckingAccountById(account.getId()) == null)
-            throw new IllegalArgumentException("No such account exists in the database");
-        this.checkingAccountRepository.delete(account);
+    public void delete(Integer id) {
+        Optional<CheckingAccount> checkingAccount = this.checkingAccountRepository.findById(id);
+        if (checkingAccount.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
+        this.checkingAccountRepository.delete(checkingAccount.get());
     }
 
     @Override

@@ -30,8 +30,10 @@ public class BankProductImpl implements BankProductService {
                 checkingAccountService,
                 savingsAccountService,
                 studentCheckingAccountService}) {
-            BankProduct product = (BankProduct) repo.getById(id);
-            if (product != null) return product;
+            try {
+                BankProduct product = (BankProduct) repo.getById(id);
+                if (product != null) return product;
+            } catch (Exception ignored) {}
         }
 
         throw new IllegalArgumentException("Could not find requested product in our database");
