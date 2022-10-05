@@ -70,10 +70,10 @@ class BankProductServiceTest {
 
     @Test
     void get() {
-        assertEquals(creditCard, this.bankProductService.get(creditCard.getId()));
         assertEquals(studentCheckingAccount, this.bankProductService.get(studentCheckingAccount.getId()));
         assertEquals(checkingAccount, this.bankProductService.get(checkingAccount.getId()));
         assertEquals(savingsAccount, this.bankProductService.get(savingsAccount.getId()));
+        assertEquals(creditCard, this.bankProductService.get(creditCard.getId()));
     }
 
     @Test

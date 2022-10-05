@@ -5,6 +5,9 @@ import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Money;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
@@ -16,16 +19,21 @@ import java.util.Date;
 public class CreditCard extends BankProduct implements HasInterestRate {
 
     @NonNull
+    @DecimalMax(value="100000.00")
     private BigDecimal creditLimit;
     @NonNull
+    @DecimalMin(value="0.2000")
+    @DecimalMin(value="0.1000")
+    @Digits(integer = 1, fraction = 4)
+    @Column(precision=1, scale=4)
     private BigDecimal interestRate;
     @NonNull
     private Date lastAccess;
 
     @Transient
-    private static final BigDecimal defaultInterestRate = new BigDecimal("0.10");
+    private static final BigDecimal defaultInterestRate = new BigDecimal("0.2000");
     @Transient
-    private static final BigDecimal minInterestRate = new BigDecimal("0.10");
+    private static final BigDecimal minInterestRate = new BigDecimal("0.1000");
     @Transient
     private static final BigDecimal defaultCreditLimit = new BigDecimal("100.00");
     @Transient
@@ -57,13 +65,15 @@ public class CreditCard extends BankProduct implements HasInterestRate {
     }
 
     public BigDecimal getInterestRate() {
-        return interestRate;
+        return interestRate.setScale(4, RoundingMode.HALF_EVEN);
     }
 
     public void setInterestRate(BigDecimal interestRate) {
+        if (interestRate.compareTo(defaultInterestRate) > 0)
+            throw new IllegalArgumentException("Interest rate cannot be over " + defaultInterestRate);
         if (interestRate.compareTo(minInterestRate) < 0)
             throw new IllegalArgumentException("Interest rate cannot fall beneath " + minInterestRate);
-        this.interestRate = interestRate;
+        this.interestRate = interestRate.setScale(4, RoundingMode.HALF_EVEN);
     }
 
     public int getOverduePeriods(Date lastAccess) {

@@ -44,7 +44,7 @@ class SavingsAccountTest {
     @Test
     void setInterestRate() {
         assertEquals(savingsAccount.getDefaultInterestRate(), savingsAccount.getInterestRate(), "Should use default value when no specific rate is set");
-        BigDecimal updatedRate = new BigDecimal("0.1");
+        BigDecimal updatedRate = new BigDecimal("0.1000");
         savingsAccount.setInterestRate(updatedRate);
         assertEquals(updatedRate, savingsAccount.getInterestRate(), "Should update interest rate when requested");
         assertThrows(IllegalArgumentException.class, () -> savingsAccount.setInterestRate(new BigDecimal("0.51")), "Should not set interest rates higher than 0.5");
