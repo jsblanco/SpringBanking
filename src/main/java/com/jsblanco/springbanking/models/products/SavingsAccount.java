@@ -33,7 +33,7 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
     @DecimalMin(value = "100.00")
     private BigDecimal minimumAmount;
     @NonNull
-    private Date lastAccess;
+    private Date lastMaintenanceDate;
 
     @Transient
     private static final BigDecimal defaultMinimumAmount = new BigDecimal("1000.00");
@@ -48,14 +48,14 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
 
 
     public SavingsAccount() {
-        setLastAccess(new Date());
+        this.lastMaintenanceDate = DateUtils.today();
         setMinimumAmount(defaultMinimumAmount);
         setInterestRate(defaultInterestRate);
     }
 
     public SavingsAccount(Integer id, BigDecimal amount, AccountHolder primaryOwner, String secretKey, Date creationDate, Status status) {
         super(id, amount, primaryOwner, secretKey, creationDate, status);
-        setLastAccess(new Date());
+        this.lastMaintenanceDate = DateUtils.today();
         setMinimumAmount(defaultMinimumAmount);
         setInterestRate(defaultInterestRate);
     }
@@ -102,31 +102,28 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
         return DateUtils.getPeriodBetweenDates(lastAccess, today).getYears();
     }
 
-    public void chargeInterestIfApplies(Date lastAccess) {
-        int overduePeriods = getOverduePeriods(lastAccess);
-        if (overduePeriods > 0)
-            setBalance(new Money(addInterest(getAmount(), interestRate, overduePeriods), getCurrency()));
-    }
 
     @NonNull
-    public Date getLastAccess() {
-        return lastAccess;
+    public Date getLastMaintenanceDate() {
+        return lastMaintenanceDate;
     }
 
-    public void setLastAccess(@NonNull Date lastAccess) {
-        chargeInterestIfApplies(lastAccess);
-        this.lastAccess = DateUtils.today();
+    public void setLastMaintenanceDate(@NonNull Date lastAccess) {
+        int overduePeriods = getOverduePeriods(lastAccess);
+        if (overduePeriods > 0) {
+            setBalance(new Money(addInterest(getAmount(), interestRate, overduePeriods), getCurrency()));
+            this.lastMaintenanceDate = DateUtils.today();
+        }
     }
 
     public BigDecimal getDefaultInterestRate() {
         return defaultInterestRate;
     }
 
-
     @Override
     public String toString() {
         return super.toString()
-                + lastAccess.getTime()
+                + lastMaintenanceDate.getTime()
                 + minimumAmount
                 + interestRate;
     }
@@ -135,7 +132,7 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
     public boolean equals(Object obj) {
         if (obj instanceof SavingsAccount account) {
             return super.equals(obj)
-                    && lastAccess.equals(account.getLastAccess())
+                    && lastMaintenanceDate.equals(account.getLastMaintenanceDate())
                     && interestRate.equals(account.getInterestRate())
                     && minimumAmount.equals(account.getMinimumBalance().getAmount());
         }

@@ -7,7 +7,7 @@ import java.util.Date;
 public interface HasInterestRate extends HasPeriodicChanges {
     BigDecimal getInterestRate();
     void setInterestRate(BigDecimal interestRate);
-    void chargeInterestIfApplies(Date lastAccess);
+
     default BigDecimal addInterest(BigDecimal amount, BigDecimal interestRate, int overduePeriods) {
         BigDecimal balance = new BigDecimal(amount.toString());
         for (int i = 0; i < overduePeriods; i++)

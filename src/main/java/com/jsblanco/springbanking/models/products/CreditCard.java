@@ -19,16 +19,16 @@ import java.util.Date;
 public class CreditCard extends BankProduct implements HasInterestRate {
 
     @NonNull
-    @DecimalMax(value="100000.00")
+    @DecimalMax(value = "100000.00")
     private BigDecimal creditLimit;
     @NonNull
-    @DecimalMin(value="0.2000")
-    @DecimalMin(value="0.1000")
+    @DecimalMin(value = "0.2000")
+    @DecimalMin(value = "0.1000")
     @Digits(integer = 1, fraction = 4)
-    @Column(precision=1, scale=4)
+    @Column(precision = 1, scale = 4)
     private BigDecimal interestRate;
     @NonNull
-    private Date lastAccess;
+    private Date lastMaintenanceDate;
 
     @Transient
     private static final BigDecimal defaultInterestRate = new BigDecimal("0.2000");
@@ -42,14 +42,14 @@ public class CreditCard extends BankProduct implements HasInterestRate {
     public CreditCard() {
         setCreditLimit(new Money(defaultCreditLimit));
         setInterestRate(defaultInterestRate);
-        setLastAccess(new Date());
+        this.lastMaintenanceDate = DateUtils.today();
     }
 
     public CreditCard(Integer id, BigDecimal amount, AccountHolder primaryOwner) {
         super(id, amount, primaryOwner);
         setCreditLimit(new Money(defaultCreditLimit));
         setInterestRate(defaultInterestRate);
-        setLastAccess(new Date());
+        this.lastMaintenanceDate = DateUtils.today();
     }
 
     public Money getCreditLimit() {
@@ -76,16 +76,9 @@ public class CreditCard extends BankProduct implements HasInterestRate {
         this.interestRate = interestRate.setScale(4, RoundingMode.HALF_EVEN);
     }
 
-    public int getOverduePeriods(Date lastAccess) {
+    public int getOverduePeriods(Date lastMaintenanceDate) {
         Date today = DateUtils.today();
-        return DateUtils.getPeriodBetweenDates(lastAccess, today).getMonths();
-    }
-
-    public void chargeInterestIfApplies(Date lastAccess) {
-        int overduePeriods = getOverduePeriods(lastAccess);
-        BigDecimal monthlyInterestRate = getInterestRate().divide(new BigDecimal(12), RoundingMode.HALF_EVEN);
-        if (overduePeriods > 0)
-            setBalance(new Money(addInterest(getAmount(), monthlyInterestRate, overduePeriods), getCurrency()));
+        return DateUtils.getPeriodBetweenDates(lastMaintenanceDate, today).getMonths();
     }
 
     public void setCreditLimit(@NonNull BigDecimal creditLimit) {
@@ -95,13 +88,17 @@ public class CreditCard extends BankProduct implements HasInterestRate {
     }
 
     @NonNull
-    public Date getLastAccess() {
-        return lastAccess;
+    public Date getLastMaintenanceDate() {
+        return lastMaintenanceDate;
     }
 
-    public void setLastAccess(@NonNull Date lastAccess) {
-        chargeInterestIfApplies(lastAccess);
-        this.lastAccess = DateUtils.today();
+    public void setLastMaintenanceDate(@NonNull Date lastMaintenanceDate) {
+        int overduePeriods = getOverduePeriods(lastMaintenanceDate);
+        BigDecimal monthlyInterestRate = getInterestRate().divide(new BigDecimal(12), RoundingMode.HALF_EVEN);
+        if (overduePeriods > 0) {
+            setBalance(new Money(addInterest(getAmount(), monthlyInterestRate, overduePeriods), getCurrency()));
+            this.lastMaintenanceDate = DateUtils.today();
+        }
     }
 
     public BigDecimal getMaxCreditLimit() {
@@ -121,7 +118,7 @@ public class CreditCard extends BankProduct implements HasInterestRate {
         return super.toString()
                 + creditLimit
                 + interestRate
-                + lastAccess.getTime();
+                + lastMaintenanceDate.getTime();
     }
 
     @Override
@@ -130,7 +127,7 @@ public class CreditCard extends BankProduct implements HasInterestRate {
             return super.equals(obj)
                     && creditLimit.equals(card.getCreditLimit().getAmount())
                     && interestRate.equals(card.getInterestRate())
-                    && lastAccess.equals(card.lastAccess);
+                    && lastMaintenanceDate.equals(card.lastMaintenanceDate);
         }
         return false;
     }

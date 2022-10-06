@@ -54,15 +54,15 @@ class CreditCardTest {
     @Test
     void mustInterestBeCharged() {
         creditCard.setBalance(new Money(new BigDecimal("1000"), creditCard.getCurrency()));
-        creditCard.chargeInterestIfApplies(Date.from(LocalDate.now().atStartOfDay().minusDays(15).toInstant(ZoneOffset.UTC)));
+        creditCard.setLastMaintenanceDate(Date.from(LocalDate.now().atStartOfDay().minusDays(15).toInstant(ZoneOffset.UTC)));
         assertEquals(new Money(new BigDecimal("1000"), creditCard.getCurrency()), creditCard.getBalance(), "Shouldn't apply interest if no month has elapsed");
 
         creditCard.setBalance(new Money(new BigDecimal("1000"), creditCard.getCurrency()));
-        creditCard.chargeInterestIfApplies(Date.from(LocalDate.now().atStartOfDay().minusMonths(1).toInstant(ZoneOffset.UTC)));
+        creditCard.setLastMaintenanceDate(Date.from(LocalDate.now().atStartOfDay().minusMonths(1).toInstant(ZoneOffset.UTC)));
         assertEquals(new Money(new BigDecimal("1016.7"), creditCard.getCurrency()), creditCard.getBalance(), "Should apply interest once if a month has elapsed");
 
         creditCard.setBalance(new Money(new BigDecimal("1000"), creditCard.getCurrency()));
-        creditCard.chargeInterestIfApplies(Date.from(LocalDate.now().atStartOfDay().minusMonths(2).toInstant(ZoneOffset.UTC)));
+        creditCard.setLastMaintenanceDate(Date.from(LocalDate.now().atStartOfDay().minusMonths(2).toInstant(ZoneOffset.UTC)));
         assertEquals(new Money(new BigDecimal("1033.68"), creditCard.getCurrency()), creditCard.getBalance(), "Should apply interest for as many months have elapsed");
     }
 
@@ -70,8 +70,8 @@ class CreditCardTest {
     @Test
     void setLastAccess() {
         creditCard.setBalance(new Money(new BigDecimal("1000"), creditCard.getCurrency()));
-        creditCard.setLastAccess(Date.from(LocalDate.now().atStartOfDay().minusMonths(1).toInstant(ZoneOffset.UTC)));
+        creditCard.setLastMaintenanceDate(Date.from(LocalDate.now().atStartOfDay().minusMonths(1).toInstant(ZoneOffset.UTC)));
         assertEquals(new Money(new BigDecimal("1016.70"), creditCard.getCurrency()), creditCard.getBalance(), "Should apply interest once if a month has elapsed");
-        assertEquals(creditCard.getLastAccess(), DateUtils.today());
+        assertEquals(creditCard.getLastMaintenanceDate(), DateUtils.today());
     }
 }

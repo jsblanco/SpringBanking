@@ -57,15 +57,15 @@ class CheckingAccountTest {
     void chargeMaintenanceIfApplies() {
         checkingAccount.setBalance(new Money(new BigDecimal(1000)));
 
-        checkingAccount.chargeMaintenanceIfApplies(Date.from(LocalDate.now().atStartOfDay().minusDays(27).toInstant(ZoneOffset.UTC)));
+        checkingAccount.setLastMaintenanceDate(Date.from(LocalDate.now().atStartOfDay().minusDays(27).toInstant(ZoneOffset.UTC)));
         assertEquals(new Money(new BigDecimal(1000)), checkingAccount.getBalance(), "Shouldn't charge maintenance if less than a month has elapsed");
 
         checkingAccount.setBalance(new Money(new BigDecimal(1000)));
-        checkingAccount.chargeMaintenanceIfApplies(Date.from(LocalDate.now().atStartOfDay().minusMonths(2).toInstant(ZoneOffset.UTC)));
+        checkingAccount.setLastMaintenanceDate(Date.from(LocalDate.now().atStartOfDay().minusMonths(2).toInstant(ZoneOffset.UTC)));
         assertEquals(new Money(new BigDecimal(976)), checkingAccount.getBalance(), "Should charge maintenance for as many months as have elapsed");
 
         checkingAccount.setBalance(new Money(new BigDecimal(1000)));
-        checkingAccount.chargeMaintenanceIfApplies(Date.from(LocalDate.now().atStartOfDay().minusMonths(15).toInstant(ZoneOffset.UTC)));
+        checkingAccount.setLastMaintenanceDate(Date.from(LocalDate.now().atStartOfDay().minusMonths(15).toInstant(ZoneOffset.UTC)));
         assertEquals(new Money(new BigDecimal(820)), checkingAccount.getBalance(), "Should take elapsed years into account when calculating elapsed months for maintenance");
     }
 
@@ -73,8 +73,8 @@ class CheckingAccountTest {
     @Test
     void setLastAccess() {
         checkingAccount.setBalance(new Money(new BigDecimal("1000"), checkingAccount.getCurrency()));
-        checkingAccount.setLastAccess(Date.from(LocalDate.now().atStartOfDay().minusMonths(1).toInstant(ZoneOffset.UTC)));
+        checkingAccount.setLastMaintenanceDate(Date.from(LocalDate.now().atStartOfDay().minusMonths(1).toInstant(ZoneOffset.UTC)));
         assertEquals(new Money(new BigDecimal("988"), checkingAccount.getCurrency()), checkingAccount.getBalance(), "Should apply interest once if a month has elapsed");
-        assertEquals(checkingAccount.getLastAccess(), DateUtils.today());
+        assertEquals(checkingAccount.getLastMaintenanceDate(), DateUtils.today());
     }
 }

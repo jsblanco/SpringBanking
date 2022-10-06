@@ -39,20 +39,10 @@ class AccountHolderControllerTest {
 
     @BeforeEach
     void setUp() {
-//        SimpleModule simpleModule = new SimpleModule();
-//        simpleModule.addKeyDeserializer(BankProduct.class, new BankProductDeserializer());
-//        objectMapper.registerModule(simpleModule);
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-//        AccountHolder accountHolder1 = new AccountHolder(1, "accountHolder1", new Date(), new Address());
-//        AccountHolder accountHolder2 = new AccountHolder(2, "accountHolder2", new Date(), new Address());
-//        AccountHolder accountHolder3 = new AccountHolder(3, "accountHolder3", new Date(), new Address());
-//        this.savingsAccountRepository.save(new SavingsAccount());
-//        this.savingsAccountRepository.save(new SavingsAccount());
-//        this.savingsAccountRepository.save(new SavingsAccount());
         this.accountHolderRepository.save(new AccountHolder( "accountHolder1", new Date(), new Address()));
         this.accountHolderRepository.save(new AccountHolder( "accountHolder2", new Date(), new Address()));
         this.accountHolderRepository.save(new AccountHolder( "accountHolder3", new Date(), new Address()));
-
     }
 
     @AfterEach

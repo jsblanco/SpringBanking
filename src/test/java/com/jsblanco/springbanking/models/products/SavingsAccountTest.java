@@ -55,15 +55,15 @@ class SavingsAccountTest {
     @Test
     void mustInterestBeCharged() {
         savingsAccount.setBalance(new Money(new BigDecimal("1000"), savingsAccount.getCurrency()));
-        savingsAccount.chargeInterestIfApplies(Date.from(LocalDate.now().atStartOfDay().minusMonths(10).toInstant(ZoneOffset.UTC)));
+        savingsAccount.setLastMaintenanceDate(Date.from(LocalDate.now().atStartOfDay().minusMonths(10).toInstant(ZoneOffset.UTC)));
         assertEquals(new Money(new BigDecimal("1000"), savingsAccount.getCurrency()), savingsAccount.getBalance(), "Shouldn't apply interest if no year has elapsed");
 
         savingsAccount.setBalance(new Money(new BigDecimal("1000"), savingsAccount.getCurrency()));
-        savingsAccount.chargeInterestIfApplies(Date.from(LocalDate.now().atStartOfDay().minusYears(1).toInstant(ZoneOffset.UTC)));
+        savingsAccount.setLastMaintenanceDate(Date.from(LocalDate.now().atStartOfDay().minusYears(1).toInstant(ZoneOffset.UTC)));
         assertEquals(new Money(new BigDecimal("1002.50"), savingsAccount.getCurrency()), savingsAccount.getBalance(), "Should apply interest once if a year has elapsed");
 
         savingsAccount.setBalance(new Money(new BigDecimal("1000"), savingsAccount.getCurrency()));
-        savingsAccount.chargeInterestIfApplies(Date.from(LocalDate.now().atStartOfDay().minusYears(2).toInstant(ZoneOffset.UTC)));
+        savingsAccount.setLastMaintenanceDate(Date.from(LocalDate.now().atStartOfDay().minusYears(2).toInstant(ZoneOffset.UTC)));
         assertEquals(new Money(new BigDecimal("1005.01"), savingsAccount.getCurrency()), savingsAccount.getBalance(), "Should apply interest for as many years have elapsed");
     }
 
@@ -71,8 +71,8 @@ class SavingsAccountTest {
     @Test
     void setLastAccess() {
         savingsAccount.setBalance(new Money(new BigDecimal("1000"), savingsAccount.getCurrency()));
-        savingsAccount.setLastAccess(Date.from(LocalDate.now().atStartOfDay().minusYears(1).toInstant(ZoneOffset.UTC)));
+        savingsAccount.setLastMaintenanceDate(Date.from(LocalDate.now().atStartOfDay().minusYears(1).toInstant(ZoneOffset.UTC)));
         assertEquals(new Money(new BigDecimal("1002.50"), savingsAccount.getCurrency()), savingsAccount.getBalance(), "Should apply interest once if a year has elapsed");
-        assertEquals(savingsAccount.getLastAccess(), DateUtils.today());
+        assertEquals(savingsAccount.getLastMaintenanceDate(), DateUtils.today());
     }
 }
