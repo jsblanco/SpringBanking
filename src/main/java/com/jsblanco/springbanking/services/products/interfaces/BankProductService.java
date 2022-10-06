@@ -12,7 +12,9 @@ public interface BankProductService {
     BankProduct update(BankProduct bankProduct);
     void delete(Integer id);
 
+    Money getProductBalance(Integer id);
+
     List<BankProduct> getAll();
     List<BankProduct> getByOwner(AccountHolder owner);
-    List<BankProduct> transferFunds(Money balance, BankProduct emitter, BankProduct recipient);
+    List<BankProduct> transferFunds(Money balance, BankProduct emitterAcc, BankProduct recipientAcc, String recipientAccHolderName);
 }

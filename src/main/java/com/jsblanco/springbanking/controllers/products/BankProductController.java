@@ -1,6 +1,7 @@
 package com.jsblanco.springbanking.controllers.products;
 
 import com.jsblanco.springbanking.models.products.BankProduct;
+import com.jsblanco.springbanking.models.util.Money;
 import com.jsblanco.springbanking.services.products.interfaces.BankProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,12 @@ public class BankProductController {
     @ResponseStatus(HttpStatus.OK)
     public BankProduct getBankProductById(@PathVariable Integer id) {
         return this.bankProductService.get(id);
+    }
+
+    @GetMapping("/product/{id}/balance")
+    @ResponseStatus(HttpStatus.OK)
+    public Money getBankProductBalance(@PathVariable Integer id) {
+        return this.bankProductService.getProductBalance(id);
     }
 
     @PostMapping("/product/")

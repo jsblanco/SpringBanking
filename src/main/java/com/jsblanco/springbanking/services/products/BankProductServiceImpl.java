@@ -68,6 +68,11 @@ public class BankProductServiceImpl implements BankProductService {
     }
 
     @Override
+    public Money getProductBalance(Integer id) {
+        return get(id).getBalance();
+    }
+
+    @Override
     public List<BankProduct> getAll() {
         Set<BankProduct> accounts = new HashSet<>();
 
@@ -92,12 +97,21 @@ public class BankProductServiceImpl implements BankProductService {
     }
 
     @Override
-    public List<BankProduct> transferFunds(Money transactionAmount, BankProduct emitter, BankProduct recipient) {
-        BankProduct emitterInDb = this.get(emitter.getId());
-        BankProduct recipientInDb = this.get(recipient.getId());
+    public List<BankProduct> transferFunds(Money transactionAmount, BankProduct emitterAcc, BankProduct recipientAcc, String recipientAccHolderName) {
+        BankProduct emitterInDb = this.get(emitterAcc.getId());
+        BankProduct recipientInDb = this.get(recipientAcc.getId());
 
         if (emitterInDb == null) throw new IllegalArgumentException("Emitter account not found in the db");
         if (recipientInDb == null) throw new IllegalArgumentException("Recipient account not found in the db");
+
+        if (recipientInDb.getPrimaryOwner().getName().trim().toLowerCase().compareTo(recipientAccHolderName.trim().toLowerCase()) != 0
+                && recipientInDb.getPrimaryOwner().getName().trim().toLowerCase().compareTo(recipientAccHolderName.trim().toLowerCase()) != 0) {
+            throw new IllegalArgumentException("Specified person does not own recipient account");
+        }
+
+        if (emitterInDb.getBalance().getAmount().compareTo(transactionAmount.getAmount()) < 0) {
+            throw new IllegalArgumentException("Emitter account balance is insufficient to fulfill transactions");
+        }
 
         emitterInDb.decreaseBalance(transactionAmount);
         recipientInDb.increaseBalance(transactionAmount);
