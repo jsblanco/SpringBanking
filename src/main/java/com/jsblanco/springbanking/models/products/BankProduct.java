@@ -17,7 +17,7 @@ import java.util.Objects;
 
 
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "product_type")
 public abstract class BankProduct implements HasBalance {
     @Id

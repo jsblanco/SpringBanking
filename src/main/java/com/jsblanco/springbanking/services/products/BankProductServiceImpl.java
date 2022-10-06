@@ -2,6 +2,7 @@ package com.jsblanco.springbanking.services.products;
 
 import com.jsblanco.springbanking.models.products.*;
 import com.jsblanco.springbanking.models.users.AccountHolder;
+import com.jsblanco.springbanking.models.util.Money;
 import com.jsblanco.springbanking.services.products.interfaces.*;
 import com.jsblanco.springbanking.services.products.interfaces.util.BankProductSubclassService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class BankProductImpl implements BankProductService {
+public class BankProductServiceImpl implements BankProductService {
 
     @Autowired
     CreditCardService creditCardService;
@@ -33,7 +34,8 @@ public class BankProductImpl implements BankProductService {
             try {
                 BankProduct product = (BankProduct) repo.getById(id);
                 if (product != null) return product;
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         throw new IllegalArgumentException("Could not find requested product in our database");
@@ -60,6 +62,7 @@ public class BankProductImpl implements BankProductService {
     public List<BankProduct> getByOwner(AccountHolder owner) {
         Set<BankProduct> accounts = new HashSet<>();
 
+        accounts.addAll(creditCardService.getByOwner(owner));
         accounts.addAll(checkingAccountService.getByOwner(owner));
         accounts.addAll(studentCheckingAccountService.getByOwner(owner));
         accounts.addAll(savingsAccountService.getByOwner(owner));
@@ -68,11 +71,20 @@ public class BankProductImpl implements BankProductService {
     }
 
     @Override
-    public List<BankProduct> transferFunds(BankProduct emitter, BankProduct recipient) {
-        return null;
+    public List<BankProduct> transferFunds(Money transactionAmount, BankProduct emitter, BankProduct recipient) {
+        BankProduct emitterInDb = this.get(emitter.getId());
+        BankProduct recipientInDb = this.get(recipient.getId());
+
+        if (emitterInDb == null) throw new IllegalArgumentException("Emitter account not found in the db");
+        if (recipientInDb == null) throw new IllegalArgumentException("Recipient account not found in the db");
+
+        emitterInDb.decreaseBalance(transactionAmount);
+        recipientInDb.increaseBalance(transactionAmount);
+
+        return new ArrayList<>(Arrays.asList(this.update(emitterInDb), this.update(recipientInDb)));
     }
 
-    public BankProductSubclassService fetchProductRepository(BankProduct bankProduct) {
+    private BankProductSubclassService fetchProductRepository(BankProduct bankProduct) {
         if (CreditCard.class.equals(bankProduct.getClass())) {
             return this.creditCardService;
         }

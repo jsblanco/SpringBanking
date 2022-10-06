@@ -2,6 +2,7 @@ package com.jsblanco.springbanking.services.products.interfaces;
 
 import com.jsblanco.springbanking.models.products.BankProduct;
 import com.jsblanco.springbanking.models.users.AccountHolder;
+import com.jsblanco.springbanking.models.util.Money;
 
 import java.util.List;
 
@@ -11,5 +12,5 @@ public interface BankProductService {
 
     List<BankProduct> getAll();
     List<BankProduct> getByOwner(AccountHolder owner);
-    List<BankProduct> transferFunds(BankProduct emitter, BankProduct recipient);
+    List<BankProduct> transferFunds(Money balance, BankProduct emitter, BankProduct recipient);
 }
