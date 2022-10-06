@@ -42,8 +42,29 @@ public class BankProductServiceImpl implements BankProductService {
     }
 
     @Override
+    public BankProduct save(BankProduct bankProduct) {
+        try {
+            get(bankProduct.getId());
+        } catch (IllegalArgumentException e) {
+            return (BankProduct) fetchProductRepository(bankProduct).save(bankProduct);
+        }
+        throw new IllegalArgumentException("There is already a product with this ID inside the database");
+    }
+
+    @Override
     public BankProduct update(BankProduct bankProduct) {
+        BankProduct productInDb = get(bankProduct.getId());
+        if (productInDb == null)
+            throw new IllegalArgumentException("No such account in the db");
         return (BankProduct) fetchProductRepository(bankProduct).save(bankProduct);
+    }
+
+    @Override
+    public void delete(Integer id) {
+        BankProduct productInDb = get(id);
+        if (productInDb == null)
+            throw new IllegalArgumentException("No such account in the db");
+        fetchProductRepository(productInDb).delete(id);
     }
 
     @Override

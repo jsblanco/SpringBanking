@@ -8,7 +8,9 @@ import java.util.List;
 
 public interface BankProductService {
     BankProduct get(Integer id);
+    BankProduct save(BankProduct bankProduct);
     BankProduct update(BankProduct bankProduct);
+    void delete(Integer id);
 
     List<BankProduct> getAll();
     List<BankProduct> getByOwner(AccountHolder owner);

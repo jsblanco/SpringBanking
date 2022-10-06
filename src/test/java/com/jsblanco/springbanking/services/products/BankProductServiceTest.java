@@ -49,7 +49,7 @@ class BankProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        holder1 = accountHolderRepository.save(new AccountHolder( "Holder1", new Date(), new Address()));
+        holder1 = accountHolderRepository.save(new AccountHolder("Holder1", new Date(), new Address()));
         holder2 = accountHolderRepository.save(new AccountHolder("Holder2", new Date(), new Address()));
 
         creditCard = creditCardRepository.save(new CreditCard(1, new BigDecimal(1000), holder1));
@@ -76,6 +76,25 @@ class BankProductServiceTest {
     }
 
     @Test
+    void save() {
+        CreditCard newCard = (CreditCard) this.bankProductService.save(new CreditCard(99, new BigDecimal(1111), holder2));
+        assertEquals(newCard, this.bankProductService.get(newCard.getId()), "Should store new credit cards");
+        assertThrows(IllegalArgumentException.class, ()-> this.bankProductService.save(newCard), "Should not let save products if they're already in the db");
+
+        SavingsAccount newSavingsAccount = (SavingsAccount) this.bankProductService.save(new SavingsAccount(2222, new BigDecimal(1000), holder1, "secret", new Date(), Status.ACTIVE));
+        assertEquals(newSavingsAccount, this.bankProductService.get(newSavingsAccount.getId()), "Should store new saving accounts");
+        assertThrows(IllegalArgumentException.class, ()-> this.bankProductService.save(newSavingsAccount), "Should not let save products if they're already in the db");
+
+        CheckingAccount newCheckingAccount = (CheckingAccount) this.bankProductService.save(new CheckingAccount(3333, new BigDecimal(1000), holder1, "secret", new Date(), Status.ACTIVE));
+        assertEquals(newCheckingAccount, this.bankProductService.get(newCheckingAccount.getId()), "Should store new checking accounts");
+        assertThrows(IllegalArgumentException.class, ()-> this.bankProductService.save(newCheckingAccount), "Should not let save products if they're already in the db");
+
+        StudentCheckingAccount newStudentCheckingAccount = (StudentCheckingAccount) this.bankProductService.save(new StudentCheckingAccount(new CheckingAccount(4444, new BigDecimal(1000), holder2, "secret", new Date(), Status.ACTIVE)));
+        assertEquals(newStudentCheckingAccount, this.bankProductService.get(newStudentCheckingAccount.getId()), "Should store new student checking accounts");
+        assertThrows(IllegalArgumentException.class, ()-> this.bankProductService.save(newStudentCheckingAccount), "Should not let save products if they're already in the db");
+    }
+
+    @Test
     void update() {
         studentCheckingAccount.setBalance(new Money(new BigDecimal(123)));
         assertEquals(studentCheckingAccount, this.bankProductService.update(studentCheckingAccount));
@@ -85,6 +104,13 @@ class BankProductServiceTest {
         assertEquals(savingsAccount, this.bankProductService.update(savingsAccount));
         creditCard.setBalance(new Money(new BigDecimal(123)));
         assertEquals(creditCard, this.bankProductService.update(creditCard));
+    }
+
+    @Test
+    void delete() {
+        this.bankProductService.delete(creditCard.getId());
+        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.get(creditCard.getId()), "Deleted product should no longer be in the DB");
+        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.delete(creditCard.getId()), "Should return an error when attempting to delete an account not in DB");
     }
 
     @Test
