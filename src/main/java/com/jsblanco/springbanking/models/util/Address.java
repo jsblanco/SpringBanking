@@ -1,6 +1,6 @@
 package com.jsblanco.springbanking.models.util;
 
-import jakarta.persistence.Embeddable;
+import javax.persistence.Embeddable;
 import org.springframework.lang.NonNull;
 
 @Embeddable
