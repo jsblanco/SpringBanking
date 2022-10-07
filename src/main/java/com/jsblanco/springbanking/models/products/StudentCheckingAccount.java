@@ -1,15 +1,7 @@
 package com.jsblanco.springbanking.models.products;
 
-import com.jsblanco.springbanking.models.util.Money;
-import com.jsblanco.springbanking.models.util.Status;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-
-import java.math.BigDecimal;
-import java.util.Currency;
-import java.util.Date;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 
 @Entity
 @DiscriminatorValue("student_checking_account")

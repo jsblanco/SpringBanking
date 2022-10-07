@@ -1,7 +1,7 @@
 package com.jsblanco.springbanking.models.users;
 
 import com.jsblanco.springbanking.models.util.Address;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import org.springframework.lang.NonNull;
 
 import java.util.*;
