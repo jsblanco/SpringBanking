@@ -1,15 +1,17 @@
 package com.jsblanco.springbanking.models.users;
 
 import com.jsblanco.springbanking.models.util.Address;
+
 import javax.persistence.*;
+
 import org.springframework.lang.NonNull;
 
-import java.util.*;
+import java.time.LocalDate;
 
 @Entity
 public class AccountHolder extends User {
     @NonNull
-    private Date birthDay;
+    private LocalDate birthDay;
 
     @Embedded
     @NonNull
@@ -30,21 +32,20 @@ public class AccountHolder extends User {
     })
     private Address mailingAddress;
 
-
     public AccountHolder() {
     }
 
-    public AccountHolder( String name, @NonNull Date birthDay, @NonNull Address primaryAddress) {
+    public AccountHolder(String name, @NonNull LocalDate birthDay, @NonNull Address primaryAddress) {
         super(name);
         this.birthDay = birthDay;
         this.primaryAddress = primaryAddress;
     }
 
-    public Date getBirthDay() {
+    public LocalDate getBirthDay() {
         return birthDay;
     }
 
-    public void setBirthDay(Date birthDay) {
+    public void setBirthDay(LocalDate birthDay) {
         this.birthDay = birthDay;
     }
 
@@ -67,14 +68,18 @@ public class AccountHolder extends User {
 
     @Override
     public String toString() {
-        return super.toString() + birthDay.getTime() + primaryAddress + (mailingAddress == null ? "" : mailingAddress);
+        return super.toString()
+                + birthDay.getDayOfYear()
+                + birthDay.getMonth()
+                + birthDay.getYear()
+                + primaryAddress
+                + (mailingAddress == null ? "" : mailingAddress);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof AccountHolder user) {
-            return super.equals(user)
-                    && birthDay.equals(user.getBirthDay());
+            return super.equals(user);
         }
         return false;
     }

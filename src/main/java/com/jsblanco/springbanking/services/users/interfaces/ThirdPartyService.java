@@ -1,7 +1,7 @@
 package com.jsblanco.springbanking.services.users.interfaces;
 
 import com.jsblanco.springbanking.models.users.ThirdParty;
-import com.jsblanco.springbanking.services.utils.CrudServiceInterface;
+import com.jsblanco.springbanking.services.users.interfaces.util.UserSubclassService;
 
-public interface ThirdPartyService extends CrudServiceInterface<ThirdParty> {
+public interface ThirdPartyService extends UserSubclassService<ThirdParty> {
 }

@@ -1,5 +1,6 @@
 package com.jsblanco.springbanking.services.products;
 
+import com.jsblanco.springbanking.dao.TransferFundsDao;
 import com.jsblanco.springbanking.models.products.*;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.Address;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -49,8 +51,8 @@ class BankProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        holder1 = accountHolderRepository.save(new AccountHolder("Holder1", new Date(), new Address()));
-        holder2 = accountHolderRepository.save(new AccountHolder("Holder2", new Date(), new Address()));
+        holder1 = accountHolderRepository.save(new AccountHolder("Holder1", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
+        holder2 = accountHolderRepository.save(new AccountHolder("Holder2", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
 
         creditCard = creditCardRepository.save(new CreditCard(1, new BigDecimal(1000), holder1));
         savingsAccount = savingsAccountRepository.save(new SavingsAccount(2, new BigDecimal(1000), holder1, "secret", new Date(), Status.ACTIVE));
@@ -144,11 +146,13 @@ class BankProductServiceTest {
 
     @Test
     void transferFunds() {
-        this.bankProductService.transferFunds(new Money(new BigDecimal(100)), checkingAccount, savingsAccount, "Holder1");
+
+        this.bankProductService.transferFunds(new TransferFundsDao(new Money(new BigDecimal(100)), checkingAccount.getId(), savingsAccount.getId(), "Holder1"), holder1);
         assertEquals(new Money(new BigDecimal(900)), this.bankProductService.get(checkingAccount.getId()).getBalance());
         assertEquals(new Money(new BigDecimal(1100)), this.bankProductService.get(savingsAccount.getId()).getBalance());
 
-        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.transferFunds(new Money(new BigDecimal(1)), checkingAccount, savingsAccount, "Wrong User"), "Should fail when specified username does not meet any of recipient account's owners' names");
-        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.transferFunds(new Money(new BigDecimal(99999)), checkingAccount, savingsAccount, "Holder1"), "Should fail when emitter account does not have enough funds");
+        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.transferFunds(new TransferFundsDao(new Money(new BigDecimal(1)), checkingAccount.getId(), savingsAccount.getId(), "Holder1"), holder2), "Should fail when user does not own emitter account");
+        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.transferFunds(new TransferFundsDao(new Money(new BigDecimal(1)), checkingAccount.getId(), savingsAccount.getId(), "Wrong User"), holder1), "Should fail when specified username does not meet any of recipient account's owners' names");
+        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.transferFunds(new TransferFundsDao(new Money(new BigDecimal(99999)), checkingAccount.getId(), savingsAccount.getId(), "Holder1"), holder1), "Should fail when emitter account does not have enough funds");
     }
 }

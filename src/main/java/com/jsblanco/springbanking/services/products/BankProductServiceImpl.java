@@ -1,7 +1,9 @@
 package com.jsblanco.springbanking.services.products;
 
+import com.jsblanco.springbanking.dao.TransferFundsDao;
 import com.jsblanco.springbanking.models.products.*;
 import com.jsblanco.springbanking.models.users.AccountHolder;
+import com.jsblanco.springbanking.models.users.User;
 import com.jsblanco.springbanking.models.util.Money;
 import com.jsblanco.springbanking.services.products.interfaces.*;
 import com.jsblanco.springbanking.services.products.interfaces.util.BankProductSubclassService;
@@ -97,26 +99,29 @@ public class BankProductServiceImpl implements BankProductService {
     }
 
     @Override
-    public List<BankProduct> transferFunds(Money transactionAmount, BankProduct emitterAcc, BankProduct recipientAcc, String recipientAccHolderName) {
-        BankProduct emitterInDb = this.get(emitterAcc.getId());
-        BankProduct recipientInDb = this.get(recipientAcc.getId());
+    public List<BankProduct> transferFunds(TransferFundsDao dao, User user) {
+        BankProduct emitterAcc = this.get(dao.getEmitterId());
+        BankProduct recipientAcc = this.get(dao.getRecipientId());
 
-        if (emitterInDb == null) throw new IllegalArgumentException("Emitter account not found in the db");
-        if (recipientInDb == null) throw new IllegalArgumentException("Recipient account not found in the db");
+        if (emitterAcc == null) throw new IllegalArgumentException("Emitter account not found in the db");
+        if (recipientAcc == null) throw new IllegalArgumentException("Recipient account not found in the db");
 
-        if (recipientInDb.getPrimaryOwner().getName().trim().toLowerCase().compareTo(recipientAccHolderName.trim().toLowerCase()) != 0
-                && recipientInDb.getPrimaryOwner().getName().trim().toLowerCase().compareTo(recipientAccHolderName.trim().toLowerCase()) != 0) {
+        if (!emitterAcc.getPrimaryOwner().equals(user) && (emitterAcc.getSecondaryOwner() == null || !emitterAcc.getSecondaryOwner().equals(user)))
+            throw new IllegalArgumentException("Logged user does not own emitter account");
+
+        if (!recipientAcc.getPrimaryOwner().areNamesEqual(dao.getRecipientName())
+                && (recipientAcc.getSecondaryOwner() == null || !recipientAcc.getSecondaryOwner().areNamesEqual(dao.getRecipientName()))) {
             throw new IllegalArgumentException("Specified person does not own recipient account");
         }
 
-        if (emitterInDb.getBalance().getAmount().compareTo(transactionAmount.getAmount()) < 0) {
+        if (emitterAcc.getBalance().getAmount().compareTo(dao.getTransaction().getAmount()) < 0) {
             throw new IllegalArgumentException("Emitter account balance is insufficient to fulfill transactions");
         }
 
-        emitterInDb.decreaseBalance(transactionAmount);
-        recipientInDb.increaseBalance(transactionAmount);
+        emitterAcc.decreaseBalance(dao.getTransaction());
+        recipientAcc.increaseBalance(dao.getTransaction());
 
-        return new ArrayList<>(Arrays.asList(this.update(emitterInDb), this.update(recipientInDb)));
+        return new ArrayList<>(Arrays.asList(this.update(emitterAcc), this.update(recipientAcc)));
     }
 
     private BankProductSubclassService fetchProductRepository(BankProduct bankProduct) {

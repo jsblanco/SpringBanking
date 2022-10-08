@@ -50,4 +50,9 @@ public class AdminServiceImpl implements AdminService {
     public List<Admin> getAll() {
         return this.adminRepository.findAll();
     }
+
+    @Override
+    public List<Admin> getByUsername(String name) {
+        return this.adminRepository.getAdminsByName(name);
+    }
 }

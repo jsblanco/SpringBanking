@@ -4,7 +4,6 @@ import com.jsblanco.springbanking.models.products.Account;
 import com.jsblanco.springbanking.models.products.CheckingAccount;
 import com.jsblanco.springbanking.models.products.StudentCheckingAccount;
 import com.jsblanco.springbanking.models.users.AccountHolder;
-import com.jsblanco.springbanking.models.util.DateUtils;
 import com.jsblanco.springbanking.services.products.interfaces.AccountService;
 import com.jsblanco.springbanking.services.products.interfaces.CheckingAccountService;
 import com.jsblanco.springbanking.services.products.interfaces.SavingsAccountService;
@@ -28,7 +27,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account createCheckingAccount(CheckingAccount account) {
-        LocalDate birthday = DateUtils.getDateLocalValue(account.getPrimaryOwner().getBirthDay());
+        LocalDate birthday = account.getPrimaryOwner().getBirthDay();
         if (Period.between(birthday, LocalDate.now()).getYears() < 24)
             return this.studentCheckingAccountService.save(new StudentCheckingAccount(account));
         return this.checkingAccountService.save(account);

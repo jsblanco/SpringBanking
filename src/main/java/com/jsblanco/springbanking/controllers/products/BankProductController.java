@@ -1,10 +1,13 @@
 package com.jsblanco.springbanking.controllers.products;
 
+import com.jsblanco.springbanking.dao.TransferFundsDao;
 import com.jsblanco.springbanking.models.products.BankProduct;
+import com.jsblanco.springbanking.models.users.User;
 import com.jsblanco.springbanking.models.util.Money;
 import com.jsblanco.springbanking.services.products.interfaces.BankProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +40,13 @@ public class BankProductController {
     @ResponseStatus(HttpStatus.CREATED)
     public BankProduct saveBankProducts(@RequestBody BankProduct product) {
         return this.bankProductService.save(product);
+    }
+
+    @PostMapping("/product/transfer")
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<BankProduct> transferFundsBetweenProducts(@RequestBody TransferFundsDao dao) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return this.bankProductService.transferFunds(dao, user);
     }
 
     @PutMapping("/product/")

@@ -50,4 +50,9 @@ public class ThirdPartyServiceImpl implements ThirdPartyService {
     public List<ThirdParty> getAll() {
         return this.thirdPartyRepository.findAll();
     }
+
+    @Override
+    public List<ThirdParty> getByUsername(String name) {
+        return this.thirdPartyRepository.getThirdPartiesByName(name);
+    }
 }

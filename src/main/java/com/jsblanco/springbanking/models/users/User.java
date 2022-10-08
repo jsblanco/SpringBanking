@@ -3,6 +3,7 @@ package com.jsblanco.springbanking.models.users;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+
 import org.springframework.lang.NonNull;
 
 @MappedSuperclass
@@ -12,6 +13,8 @@ public abstract class User {
     private Integer id;
     @NonNull
     private String name;
+    @NonNull
+    private String password;
 
     public User() {
     }
@@ -34,6 +37,19 @@ public abstract class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @NonNull
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(@NonNull String password) {
+        this.password = password;
+    }
+
+    public boolean areNamesEqual(String comparedName) {
+        return name.trim().toLowerCase().compareTo(comparedName.trim().toLowerCase()) == 0;
     }
 
     @Override

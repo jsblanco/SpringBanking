@@ -50,4 +50,9 @@ public class AccountHolderServiceImpl implements AccountHolderService {
     public List<AccountHolder> getAll() {
         return this.accountHolderRepository.findAll();
     }
+
+    @Override
+    public List<AccountHolder> getByUsername(String name) {
+        return this.accountHolderRepository.getAccountHoldersByName(name);
+    }
 }
