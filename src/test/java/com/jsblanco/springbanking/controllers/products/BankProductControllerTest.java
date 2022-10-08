@@ -70,6 +70,11 @@ class BankProductControllerTest {
 
     @AfterEach
     void tearDown() {
+        accountHolderRepository.deleteAll();
+        creditCardRepository.deleteAll();
+        savingsAccountRepository.deleteAll();
+        checkingAccountRepository.deleteAll();
+        studentCheckingAccountRepository.deleteAll();
     }
 
     @Test
