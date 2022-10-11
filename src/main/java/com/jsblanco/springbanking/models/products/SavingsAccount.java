@@ -1,5 +1,6 @@
 package com.jsblanco.springbanking.models.products;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jsblanco.springbanking.models.interfaces.HasInterestRate;
 import com.jsblanco.springbanking.models.interfaces.HasMinimumBalance;
 import com.jsblanco.springbanking.models.users.AccountHolder;
@@ -70,6 +71,7 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
         super.setBalance(reduceBalanceAccountingForPenalty(getBalance(), deposit, getPenaltyFee()));
     }
 
+    @JsonIgnore
     public Money getMinimumBalance() {
         return new Money(minimumAmount, getCurrency());
     }
@@ -116,6 +118,7 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
         }
     }
 
+    @JsonIgnore
     public BigDecimal getDefaultInterestRate() {
         return defaultInterestRate;
     }

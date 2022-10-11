@@ -1,5 +1,9 @@
 package com.jsblanco.springbanking.models.products;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.jsblanco.springbanking.models.interfaces.HasInterestRate;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.DateUtils;
@@ -19,6 +23,8 @@ import java.math.RoundingMode;
 import java.util.Date;
 
 @Entity
+@JsonDeserialize(as=CreditCard.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 @DiscriminatorValue("credit_card")
 public class CreditCard extends BankProduct implements HasInterestRate {
 
@@ -44,28 +50,36 @@ public class CreditCard extends BankProduct implements HasInterestRate {
     private static final BigDecimal maxCreditLimit = new BigDecimal("100000.00");
 
     public CreditCard() {
-        setCreditLimit(new Money(defaultCreditLimit));
+        setCreditLimit(defaultCreditLimit);
         setInterestRate(defaultInterestRate);
         this.lastMaintenanceDate = DateUtils.today();
     }
 
     public CreditCard(Integer id, BigDecimal amount, AccountHolder primaryOwner) {
         super(id, amount, primaryOwner);
-        setCreditLimit(new Money(defaultCreditLimit));
+        setCreditLimit(defaultCreditLimit);
         setInterestRate(defaultInterestRate);
         this.lastMaintenanceDate = DateUtils.today();
     }
 
-    public Money getCreditLimit() {
-        return new Money(creditLimit, getCurrency());
+    public BigDecimal getCreditLimit() {
+        return creditLimit;
     }
 
+    @JsonIgnore
     public void setCreditLimit(Money creditLimit) {
         if (getCurrency() != creditLimit.getCurrency())
             throw new IllegalArgumentException("This account uses " + getCurrency() + " but you tried to input " + creditLimit.getCurrency() + ".");
         if (creditLimit.getAmount().compareTo(maxCreditLimit) > 0)
             throw new IllegalArgumentException("Credit limit cannot be higher than " + maxCreditLimit);
         this.creditLimit = creditLimit.getAmount();
+    }
+
+    @JsonProperty("creditLimit")
+    public void setCreditLimit(@NonNull BigDecimal creditLimit) {
+        if (maxCreditLimit.compareTo(creditLimit) < 0)
+            throw new IllegalArgumentException("Credit limit cannot be bigger than " + maxCreditLimit);
+        this.creditLimit = creditLimit;
     }
 
     public BigDecimal getInterestRate() {
@@ -83,12 +97,6 @@ public class CreditCard extends BankProduct implements HasInterestRate {
     public int getOverduePeriods(Date lastMaintenanceDate) {
         Date today = DateUtils.today();
         return DateUtils.getPeriodBetweenDates(lastMaintenanceDate, today).getMonths();
-    }
-
-    public void setCreditLimit(@NonNull BigDecimal creditLimit) {
-        if (maxCreditLimit.compareTo(creditLimit) < 0)
-            throw new IllegalArgumentException("Credit limit cannot be bigger than " + maxCreditLimit);
-        this.creditLimit = creditLimit;
     }
 
     @NonNull
@@ -129,7 +137,7 @@ public class CreditCard extends BankProduct implements HasInterestRate {
     public boolean equals(Object obj) {
         if (obj instanceof CreditCard card) {
             return super.equals(obj)
-                    && creditLimit.equals(card.getCreditLimit().getAmount())
+                    && creditLimit.equals(card.getCreditLimit())
                     && interestRate.equals(card.getInterestRate())
                     && lastMaintenanceDate.equals(card.lastMaintenanceDate);
         }

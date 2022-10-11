@@ -1,5 +1,6 @@
 package com.jsblanco.springbanking.models.products;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jsblanco.springbanking.models.interfaces.HasMaintenanceFee;
 import com.jsblanco.springbanking.models.interfaces.HasMinimumBalance;
 import com.jsblanco.springbanking.models.users.AccountHolder;
@@ -10,6 +11,7 @@ import org.springframework.lang.NonNull;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -19,10 +21,10 @@ public class CheckingAccount extends Account implements HasMinimumBalance, HasMa
 
     @NonNull
     private Date lastMaintenanceDate;
-    @NonNull
-    private final BigDecimal monthlyMaintenanceFee = new BigDecimal("12.00");
-    @NonNull
-    private final BigDecimal minimumAmount = new BigDecimal("250.00");
+    @Transient
+    private static final BigDecimal monthlyMaintenanceFee = new BigDecimal("12.00");
+    @Transient
+    private static final BigDecimal minimumAmount = new BigDecimal("250.00");
 
     public CheckingAccount() {
     }
@@ -36,11 +38,13 @@ public class CheckingAccount extends Account implements HasMinimumBalance, HasMa
         super.setBalance(reduceBalanceAccountingForPenalty(getBalance(), deposit, penaltyFee));
     }
 
+    @JsonIgnore
     public Money getMinimumBalance() {
         return new Money(minimumAmount, getCurrency());
     }
 
     @Override
+    @JsonIgnore
     public Money getMonthlyMaintenanceFee() {
         return new Money(monthlyMaintenanceFee, getCurrency());
     }
@@ -56,8 +60,11 @@ public class CheckingAccount extends Account implements HasMinimumBalance, HasMa
         return lastMaintenanceDate;
     }
 
-    public void setLastMaintenanceDate(@NonNull Date lastAccess) {
-        int overduePeriods = getOverduePeriods(lastAccess);
+    public void setLastMaintenanceDate(@NonNull Date lastMaintenanceDate) {
+        if (this.lastMaintenanceDate == null)
+            this.lastMaintenanceDate = lastMaintenanceDate;
+
+        int overduePeriods = getOverduePeriods(lastMaintenanceDate);
         if (overduePeriods > 0) {
             setBalance(new Money(subtractMaintenance(monthlyMaintenanceFee, overduePeriods), getCurrency()));
             this.lastMaintenanceDate = DateUtils.today();

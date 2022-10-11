@@ -26,10 +26,10 @@ class CreditCardTest {
     @Test
     void setCreditLimit() {
         BigDecimal defaultCreditLimit = creditCard.getDefaultCreditLimit();
-        assertEquals(defaultCreditLimit, creditCard.getCreditLimit().getAmount(), "Initial credit limit differs from default");
+        assertEquals(defaultCreditLimit, creditCard.getCreditLimit(), "Initial credit limit differs from default");
         BigDecimal updatedCreditLimit = defaultCreditLimit.add(new BigDecimal("1"));
         creditCard.setCreditLimit(updatedCreditLimit);
-        assertEquals(updatedCreditLimit, creditCard.getCreditLimit().getAmount(), "Credit limit did not update upon calling setter");
+        assertEquals(updatedCreditLimit, creditCard.getCreditLimit(), "Credit limit did not update upon calling setter");
     }
 
     @DisplayName("Should not admit credit limits over max value")

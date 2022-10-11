@@ -14,6 +14,8 @@ public class Money {
     private Currency currency;
     private BigDecimal amount;
 
+    public Money(){}
+
     /**
      * Class constructor specifying amount, currency, and rounding
      **/

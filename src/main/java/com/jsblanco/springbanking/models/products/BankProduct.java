@@ -29,7 +29,7 @@ public abstract class BankProduct implements HasBalance {
     @ManyToOne
     @NotFound(action = NotFoundAction.IGNORE)
     @JoinColumn(name = "primary_owner", nullable = false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     private AccountHolder primaryOwner;
 
     @ManyToOne

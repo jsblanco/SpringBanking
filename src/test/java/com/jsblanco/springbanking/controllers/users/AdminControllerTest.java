@@ -55,14 +55,14 @@ class AdminControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
 
-        Admin adminList = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Admin.class);
+        Admin fetchedAdmin = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Admin.class);
 
-        assertEquals(adminList.getId(), dbAdmin.getId());
-        assertEquals(adminList.getName(), dbAdmin.getName());
+        assertEquals(fetchedAdmin.getId(), dbAdmin.getId());
+        assertEquals(fetchedAdmin.getName(), dbAdmin.getName());
     }
 
     @Test
-    void getAllThirdParties() throws Exception {
+    void getAllAdmins() throws Exception {
         MvcResult mvcResult = mockMvc.perform(get("/admin/"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

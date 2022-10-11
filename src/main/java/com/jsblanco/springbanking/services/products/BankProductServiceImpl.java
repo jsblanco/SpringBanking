@@ -24,7 +24,6 @@ public class BankProductServiceImpl implements BankProductService {
     @Autowired
     StudentCheckingAccountService studentCheckingAccountService;
 
-
     @Override
     public BankProduct get(Integer id) {
 

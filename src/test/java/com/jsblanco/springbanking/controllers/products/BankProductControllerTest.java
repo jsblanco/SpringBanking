@@ -1,11 +1,13 @@
 package com.jsblanco.springbanking.controllers.products;
 
-import com.jsblanco.springbanking.models.products.CheckingAccount;
-import com.jsblanco.springbanking.models.products.CreditCard;
-import com.jsblanco.springbanking.models.products.SavingsAccount;
-import com.jsblanco.springbanking.models.products.StudentCheckingAccount;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.jsblanco.springbanking.dao.TransferFundsDao;
+import com.jsblanco.springbanking.models.products.*;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.Address;
+import com.jsblanco.springbanking.models.util.Money;
 import com.jsblanco.springbanking.models.util.Status;
 import com.jsblanco.springbanking.repositories.products.CheckingAccountRepository;
 import com.jsblanco.springbanking.repositories.products.CreditCardRepository;
@@ -17,42 +19,67 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@AutoConfigureMockMvc
+@SpringBootTest
 class BankProductControllerTest {
 
     @Autowired
-    AccountHolderRepository accountHolderRepository;
+    private AccountHolderRepository accountHolderRepository;
     @Autowired
-    CreditCardRepository creditCardRepository;
+    private CreditCardRepository creditCardRepository;
     @Autowired
-    SavingsAccountRepository savingsAccountRepository;
+    private SavingsAccountRepository savingsAccountRepository;
     @Autowired
-    CheckingAccountRepository checkingAccountRepository;
+    private CheckingAccountRepository checkingAccountRepository;
     @Autowired
-    StudentCheckingAccountRepository studentCheckingAccountRepository;
+    private StudentCheckingAccountRepository studentCheckingAccountRepository;
     @Autowired
-    BankProductService bankProductService;
+    private BankProductService bankProductService;
 
-    AccountHolder holder1;
-    AccountHolder holder2;
+    private AccountHolder holder1;
+    private AccountHolder holder2;
 
-    CreditCard creditCard;
-    SavingsAccount savingsAccount;
-    CheckingAccount checkingAccount;
-    StudentCheckingAccount studentCheckingAccount;
+    private CreditCard creditCard;
+    private SavingsAccount savingsAccount;
+    private CheckingAccount checkingAccount;
+    private StudentCheckingAccount studentCheckingAccount;
+
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+    private MockMvc mockMvc;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
+        objectMapper.registerModule(new JavaTimeModule());
+
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         holder1 = accountHolderRepository.save(new AccountHolder("Holder1", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
         holder2 = accountHolderRepository.save(new AccountHolder("Holder2", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
 
@@ -78,23 +105,112 @@ class BankProductControllerTest {
     }
 
     @Test
-    void getAllBankProducts() {
+    void getAllBankProducts() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(get("/product/"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        List<BankProduct> productList = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), new TypeReference<>() {
+        });
+
+        assertEquals(4, productList.size());
+        assertTrue(mvcResult.getResponse().getContentAsString().contains("admin1"));
     }
 
     @Test
-    void getBankProductById() {
+    void getBankProductById() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(get("/product/" + creditCard.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        CreditCard fetchedCreditCard = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), CreditCard.class);
+        assertEquals(fetchedCreditCard, creditCard);
+
+        mvcResult = mockMvc.perform(get("/product/" + checkingAccount.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        CheckingAccount fetchedCheckingAccount = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), CheckingAccount.class);
+        assertEquals(fetchedCheckingAccount, checkingAccount);
+
+        mvcResult = mockMvc.perform(get("/product/" + studentCheckingAccount.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        StudentCheckingAccount fetchedStudentCheckingAccount = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), StudentCheckingAccount.class);
+        assertEquals(fetchedStudentCheckingAccount, studentCheckingAccount);
+
+        mvcResult = mockMvc.perform(get("/product/" + savingsAccount.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        SavingsAccount fetchedSavingsAccount = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), SavingsAccount.class);
+        assertEquals(fetchedSavingsAccount, savingsAccount);
     }
 
     @Test
-    void getBankProductBalance() {
+    void getBankProductBalance() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(get("/product/" + savingsAccount.getId() + "/balance"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        Money fetchedSavingsAccountBalance = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Money.class);
+        assertEquals(fetchedSavingsAccountBalance, savingsAccount.getBalance());
     }
 
     @Test
-    void saveBankProducts() {
+    void saveBankProducts() throws Exception {
+        CreditCard newCreditCard = new CreditCard(9, new BigDecimal(12), holder1);
+        String payload = objectMapper.writeValueAsString(newCreditCard);
+        MvcResult mvcResult = mockMvc.perform(post("/product/")
+                        .content(payload)
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        CreditCard fetchedCreditCard = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), CreditCard.class);
+        assertEquals(fetchedCreditCard, newCreditCard);
     }
 
     @Test
-    void transferFundsBetweenProducts() {
+    void transferFundsBetweenProducts() throws Exception {
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(holder1);
+
+        Money transfer = new Money(new BigDecimal(10));
+        TransferFundsDao transferFundsDao = new TransferFundsDao(transfer, checkingAccount.getId(), savingsAccount.getId(), holder1.getName());
+
+        String payload = objectMapper.writeValueAsString(transferFundsDao);
+        MvcResult mvcResult = mockMvc.perform(post("/product/transfer")
+                        .content(payload)
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        List<BankProduct> fetchedSavingsAccount = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), new TypeReference<>() {
+        });
+
+        Money expectedEmitterBalance = checkingAccount.getBalance();
+        expectedEmitterBalance.decreaseAmount(transfer);
+
+        Money expectedRecipientBalance = savingsAccount.getBalance();
+        expectedRecipientBalance.increaseAmount(transfer);
+        assertEquals(fetchedSavingsAccount.get(0).getBalance(), expectedEmitterBalance);
+        assertEquals(fetchedSavingsAccount.get(1).getBalance(), expectedRecipientBalance);
+
     }
 
     @Test
