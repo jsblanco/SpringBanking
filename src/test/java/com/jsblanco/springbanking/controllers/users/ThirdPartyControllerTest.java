@@ -134,8 +134,6 @@ class ThirdPartyControllerTest {
         assertEquals(updatedThirdParty.getId(), fetchedThirdParty.getId());
         assertEquals(updatedThirdParty.getName(), fetchedThirdParty.getName());
         assertEquals(updatedThirdParty.getHashedKey(), fetchedThirdParty.getHashedKey());
-
-
     }
 
     @Test
