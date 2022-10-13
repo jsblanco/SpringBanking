@@ -3,6 +3,7 @@ package com.jsblanco.springbanking.services.products;
 import com.jsblanco.springbanking.dao.TransferFundsDao;
 import com.jsblanco.springbanking.models.products.*;
 import com.jsblanco.springbanking.models.users.AccountHolder;
+import com.jsblanco.springbanking.models.users.Admin;
 import com.jsblanco.springbanking.models.util.Address;
 import com.jsblanco.springbanking.models.util.Money;
 import com.jsblanco.springbanking.models.util.Status;
@@ -11,6 +12,7 @@ import com.jsblanco.springbanking.repositories.products.CreditCardRepository;
 import com.jsblanco.springbanking.repositories.products.SavingsAccountRepository;
 import com.jsblanco.springbanking.repositories.products.StudentCheckingAccountRepository;
 import com.jsblanco.springbanking.repositories.users.AccountHolderRepository;
+import com.jsblanco.springbanking.repositories.users.AdminRepository;
 import com.jsblanco.springbanking.services.products.interfaces.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class BankProductServiceTest {
 
     @Autowired
+    AdminRepository adminRepository;
+    @Autowired
     AccountHolderRepository accountHolderRepository;
     @Autowired
     CreditCardRepository creditCardRepository;
@@ -42,6 +46,7 @@ class BankProductServiceTest {
     @Autowired
     BankProductService bankProductService;
 
+    Admin admin;
     AccountHolder holder1;
     AccountHolder holder2;
 
@@ -52,6 +57,7 @@ class BankProductServiceTest {
 
     @BeforeEach
     void setUp() {
+        admin = adminRepository.save(new Admin());
         holder1 = accountHolderRepository.save(new AccountHolder("Holder1", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
         holder2 = accountHolderRepository.save(new AccountHolder("Holder2", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
 
@@ -76,7 +82,7 @@ class BankProductServiceTest {
         assertEquals(checkingAccount, this.bankProductService.get(checkingAccount.getId()));
         assertEquals(savingsAccount, this.bankProductService.get(savingsAccount.getId()));
         assertEquals(creditCard, this.bankProductService.get(creditCard.getId()));
-        assertThrows(ResponseStatusException.class, ()-> this.bankProductService.get(12345), "Should return an exception when fetching an ID not in the DB");
+        assertThrows(ResponseStatusException.class, () -> this.bankProductService.get(12345), "Should return an exception when fetching an ID not in the DB");
     }
 
     @Test
@@ -108,8 +114,7 @@ class BankProductServiceTest {
         assertEquals(savingsAccount, this.bankProductService.update(savingsAccount));
         creditCard.setBalance(new Money(new BigDecimal(123)));
         assertEquals(creditCard, this.bankProductService.update(creditCard));
-        assertThrows(ResponseStatusException.class, ()-> this.bankProductService.update(new CreditCard()), "Should return an exception when attempting to update a product that is not in the DB");
-
+        assertThrows(ResponseStatusException.class, () -> this.bankProductService.update(new CreditCard()), "Should return an exception when attempting to update a product that is not in the DB");
     }
 
     @Test
@@ -125,6 +130,22 @@ class BankProductServiceTest {
         assertEquals(checkingAccount.getBalance(), this.bankProductService.getProductBalance(checkingAccount.getId(), holder1));
         assertEquals(savingsAccount.getBalance(), this.bankProductService.getProductBalance(savingsAccount.getId(), holder1));
         assertEquals(creditCard.getBalance(), this.bankProductService.getProductBalance(creditCard.getId(), holder1));
+    }
+
+    @Test
+    void modifyProductBalance() {
+        Money balanceModification = new Money(new BigDecimal(10));
+        Money updatedBalance = checkingAccount.getBalance();
+        updatedBalance.increaseAmount(balanceModification);
+        this.bankProductService.modifyProductBalance(checkingAccount.getId(), balanceModification, admin);
+        assertEquals(updatedBalance, this.bankProductService.getProductBalance(checkingAccount.getId(), admin));
+
+        balanceModification = new Money(new BigDecimal(-10));
+        updatedBalance.decreaseAmount(balanceModification);
+        this.bankProductService.modifyProductBalance(checkingAccount.getId(), balanceModification, admin);
+        assertEquals(updatedBalance, this.bankProductService.getProductBalance(checkingAccount.getId(), admin));
+
+        assertThrows(ResponseStatusException.class, ()->this.bankProductService.modifyProductBalance(checkingAccount.getId(), new Money(new BigDecimal(1)), holder1), "Only admins should be able to modify balances this way");
     }
 
     @Test

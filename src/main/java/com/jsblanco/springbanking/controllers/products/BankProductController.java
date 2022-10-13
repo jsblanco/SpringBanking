@@ -37,6 +37,13 @@ public class BankProductController {
         return this.bankProductService.getProductBalance(id, user);
     }
 
+    @PostMapping("/product/{id}/balance")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Money modifyBankProductBalance(@PathVariable Integer id, @RequestBody Money newBalance) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return this.bankProductService.modifyProductBalance(id, newBalance, user);
+    }
+
     @PostMapping("/product/")
     @ResponseStatus(HttpStatus.CREATED)
     public BankProduct saveBankProducts(@RequestBody BankProduct product) {

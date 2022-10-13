@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Service
@@ -78,6 +79,18 @@ public class BankProductServiceImpl implements BankProductService {
         BankProduct product = get(id);
         if (user instanceof Admin || (user instanceof AccountHolder && product.isOwnedBy((AccountHolder) user))) {
             return get(id).getBalance();
+        }
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have access to this account's balance");
+    }
+
+    @Override
+    public Money modifyProductBalance(Integer id, Money balanceChange, User user) {
+        BankProduct product = get(id);
+        if (user instanceof Admin) {
+            if (balanceChange.getAmount().compareTo(BigDecimal.ZERO) > 0)
+                product.increaseBalance(balanceChange);
+            else product.decreaseBalance(balanceChange);
+            return update(product).getBalance();
         }
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have access to this account's balance");
     }
