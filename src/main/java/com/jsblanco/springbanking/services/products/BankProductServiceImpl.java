@@ -1,9 +1,11 @@
 package com.jsblanco.springbanking.services.products;
 
+import com.jsblanco.springbanking.dao.ThirdPartyTransferDao;
 import com.jsblanco.springbanking.dao.TransferFundsDao;
 import com.jsblanco.springbanking.models.products.*;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.users.Admin;
+import com.jsblanco.springbanking.models.users.ThirdParty;
 import com.jsblanco.springbanking.models.users.User;
 import com.jsblanco.springbanking.models.util.Money;
 import com.jsblanco.springbanking.services.products.interfaces.*;
@@ -160,5 +162,29 @@ public class BankProductServiceImpl implements BankProductService {
         }
 
         throw new IllegalArgumentException("Product not recognised");
+    }
+
+    public void thirdPartyOperation(String hashedKey, ThirdPartyTransferDao transferData, User user) {
+        if (!(user instanceof ThirdParty))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This action can only be performed by a third party user");
+        if (!((ThirdParty) user).getHashedKey().equals(hashedKey))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Provided hashed key does not match logged user");
+
+        Account account = getAccount(transferData.getAccountId());
+        if (!account.getSecretKey().equals(transferData.getSecretKey()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Provided secret key does not match requested account");
+
+        if (transferData.getTransfer().getAmount().compareTo(BigDecimal.ZERO) > 0)
+            account.increaseBalance(transferData.getTransfer());
+        else
+            account.decreaseBalance(transferData.getTransfer());
+
+        this.update(account);
+    }
+
+    private Account getAccount(Integer accountId) {
+        BankProduct account = get(accountId);
+        if (account instanceof Account) return (Account) account;
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Could not find an account with the provided ID");
     }
 }

@@ -48,5 +48,4 @@ public class ThirdPartyController {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         this.thirdPartyService.delete(id, user);
     }
-
 }

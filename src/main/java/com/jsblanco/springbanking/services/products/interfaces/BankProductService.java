@@ -1,5 +1,6 @@
 package com.jsblanco.springbanking.services.products.interfaces;
 
+import com.jsblanco.springbanking.dao.ThirdPartyTransferDao;
 import com.jsblanco.springbanking.dao.TransferFundsDao;
 import com.jsblanco.springbanking.models.products.BankProduct;
 import com.jsblanco.springbanking.models.users.AccountHolder;
@@ -20,4 +21,5 @@ public interface BankProductService {
     List<BankProduct> getAll();
     List<BankProduct> getByOwner(AccountHolder owner);
     List<BankProduct> transferFunds(TransferFundsDao dao, User user);
+    void thirdPartyOperation(String hashedKey, ThirdPartyTransferDao transferData, User user);
 }
