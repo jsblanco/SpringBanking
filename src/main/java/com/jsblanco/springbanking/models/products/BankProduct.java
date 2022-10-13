@@ -1,6 +1,7 @@
 package com.jsblanco.springbanking.models.products;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.jsblanco.springbanking.models.interfaces.HasBalance;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.Money;
@@ -18,6 +19,7 @@ import java.util.Objects;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 @DiscriminatorColumn(name = "product_type")
 public abstract class BankProduct implements HasBalance {
     @Id
@@ -110,6 +112,10 @@ public abstract class BankProduct implements HasBalance {
     public void setPrimaryOwner(@NonNull AccountHolder primaryOwner) {
         this.primaryOwner = primaryOwner;
         if ((secondaryOwner != null) && secondaryOwner.equals(this.primaryOwner)) setSecondaryOwner(null);
+    }
+
+    public boolean isOwnedBy(AccountHolder user) {
+        return this.primaryOwner.equals(user) || (this.secondaryOwner != null && this.secondaryOwner.equals(user));
     }
 
     @Nullable

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jsblanco.springbanking.dao.TransferFundsDao;
 import com.jsblanco.springbanking.models.products.*;
 import com.jsblanco.springbanking.models.users.AccountHolder;
+import com.jsblanco.springbanking.models.users.Admin;
 import com.jsblanco.springbanking.models.util.Address;
 import com.jsblanco.springbanking.models.util.Money;
 import com.jsblanco.springbanking.models.util.Status;
@@ -14,7 +15,7 @@ import com.jsblanco.springbanking.repositories.products.CreditCardRepository;
 import com.jsblanco.springbanking.repositories.products.SavingsAccountRepository;
 import com.jsblanco.springbanking.repositories.products.StudentCheckingAccountRepository;
 import com.jsblanco.springbanking.repositories.users.AccountHolderRepository;
-import com.jsblanco.springbanking.services.products.interfaces.BankProductService;
+import com.jsblanco.springbanking.repositories.users.AdminRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,9 +31,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -40,8 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -49,6 +50,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 class BankProductControllerTest {
 
+    @Autowired
+    private AdminRepository adminRepository;
     @Autowired
     private AccountHolderRepository accountHolderRepository;
     @Autowired
@@ -59,9 +62,8 @@ class BankProductControllerTest {
     private CheckingAccountRepository checkingAccountRepository;
     @Autowired
     private StudentCheckingAccountRepository studentCheckingAccountRepository;
-    @Autowired
-    private BankProductService bankProductService;
 
+    private Admin admin;
     private AccountHolder holder1;
     private AccountHolder holder2;
 
@@ -80,6 +82,7 @@ class BankProductControllerTest {
         objectMapper.registerModule(new JavaTimeModule());
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        admin = adminRepository.save(new Admin());
         holder1 = accountHolderRepository.save(new AccountHolder("Holder1", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
         holder2 = accountHolderRepository.save(new AccountHolder("Holder2", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
 
@@ -115,7 +118,7 @@ class BankProductControllerTest {
         });
 
         assertEquals(4, productList.size());
-        assertTrue(mvcResult.getResponse().getContentAsString().contains("admin1"));
+        assertTrue(productList.containsAll(new ArrayList<>(Arrays.asList(savingsAccount, creditCard, checkingAccount, studentCheckingAccount))));
     }
 
     @Test
@@ -162,11 +165,26 @@ class BankProductControllerTest {
 
         Money fetchedSavingsAccountBalance = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Money.class);
         assertEquals(fetchedSavingsAccountBalance, savingsAccount.getBalance());
+
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(admin);
+        mvcResult = mockMvc.perform(get("/product/" + savingsAccount.getId() + "/balance"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        fetchedSavingsAccountBalance = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Money.class);
+        assertEquals(fetchedSavingsAccountBalance, savingsAccount.getBalance());
+
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(holder2);
+        mockMvc.perform(get("/product/" + savingsAccount.getId() + "/balance"))
+                .andExpect(status().isForbidden());
     }
 
     @Test
     void saveBankProducts() throws Exception {
-        CreditCard newCreditCard = new CreditCard(9, new BigDecimal(12), holder1);
+        CreditCard newCreditCard = new CreditCard();
+        newCreditCard.setBalance(new Money(new BigDecimal(10000)));
+        newCreditCard.setPrimaryOwner(holder1);
         String payload = objectMapper.writeValueAsString(newCreditCard);
         MvcResult mvcResult = mockMvc.perform(post("/product/")
                         .content(payload)
@@ -177,17 +195,12 @@ class BankProductControllerTest {
                 .andReturn();
 
         CreditCard fetchedCreditCard = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), CreditCard.class);
-        assertEquals(fetchedCreditCard, newCreditCard);
+        assertEquals(fetchedCreditCard.getBalance(), newCreditCard.getBalance());
+        assertEquals(fetchedCreditCard.getPrimaryOwner(), newCreditCard.getPrimaryOwner());
     }
 
     @Test
     void transferFundsBetweenProducts() throws Exception {
-        Authentication authentication = mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(holder1);
-
         Money transfer = new Money(new BigDecimal(10));
         TransferFundsDao transferFundsDao = new TransferFundsDao(transfer, checkingAccount.getId(), savingsAccount.getId(), holder1.getName());
 
@@ -214,10 +227,30 @@ class BankProductControllerTest {
     }
 
     @Test
-    void updateBankProducts() {
+    void updateBankProducts() throws Exception {
+        checkingAccount.setBalance(new Money(new BigDecimal(10000)));
+        checkingAccount.setPrimaryOwner(holder2);
+        String payload = objectMapper.writeValueAsString(checkingAccount);
+        MvcResult mvcResult = mockMvc.perform(put("/product/")
+                        .content(payload)
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        CheckingAccount fetchedCheckingAccount = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), CheckingAccount.class);
+        assertEquals(fetchedCheckingAccount, checkingAccount);
     }
 
     @Test
-    void deleteBankProducts() {
+    void deleteBankProducts() throws Exception {
+        mockMvc.perform(delete("/product/" + savingsAccount.getId()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        mockMvc.perform(get("/product/" + savingsAccount.getId()))
+                .andExpect(status().isNotFound())
+                .andReturn();
     }
 }

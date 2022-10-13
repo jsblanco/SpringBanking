@@ -117,7 +117,6 @@ class AdminControllerTest {
     void deleteAdmin() throws Exception {
         Admin admin = this.adminRepository.findAll().get(0);
 
-        System.out.println(+admin.getId());
         mockMvc.perform(delete("/admin/" + admin.getId()))
                 .andExpect(status().isOk())
                 .andReturn();

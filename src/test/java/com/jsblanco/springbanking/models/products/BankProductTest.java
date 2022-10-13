@@ -1,11 +1,14 @@
 package com.jsblanco.springbanking.models.products;
 
+import com.jsblanco.springbanking.models.users.AccountHolder;
+import com.jsblanco.springbanking.models.util.Address;
 import com.jsblanco.springbanking.models.util.Money;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Currency;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BankProductTest {
 
-    private static class TestBankProduct extends BankProduct {}
+    private static class TestBankProduct extends BankProduct {
+    }
 
     TestBankProduct bankProduct;
 
@@ -54,6 +58,25 @@ class BankProductTest {
         bankProduct.setCurrency(currency);
 
         assertEquals(new Money(amount, currency), bankProduct.getBalance());
+    }
+
+    @DisplayName("Should return if the account is owned by the provided user, no matter if as the primary or secondary owner")
+    @Test
+    void isOwnedBy() {
+        AccountHolder primaryOwner = new AccountHolder("primaryOwner", LocalDate.now(), new Address());
+        primaryOwner.setId(1);
+        bankProduct.setPrimaryOwner(primaryOwner);
+        assertTrue(bankProduct.isOwnedBy(primaryOwner), "Should return true when its primary owner is passed, even if secondary owner is null");
+
+        AccountHolder secondaryOwner = new AccountHolder("secondaryOwner", LocalDate.now(), new Address());
+        secondaryOwner.setId(2);
+        bankProduct.setSecondaryOwner(secondaryOwner);
+        assertTrue(bankProduct.isOwnedBy(primaryOwner), "Should return true when its primary owner is passed and the secondary owner is not null");
+        assertTrue(bankProduct.isOwnedBy(secondaryOwner), "Should return true when its secondary owner is passed");
+
+        AccountHolder nonOwner = new AccountHolder("nonOwner", LocalDate.now(), new Address());
+        nonOwner.setId(3);
+        assertFalse(bankProduct.isOwnedBy(nonOwner), "Should return false when a user that is neither its primary nor its secondary owner is passed");
     }
 
     @DisplayName("When setting a balance, it should store the Money class keys in the Amount and Currency keys")

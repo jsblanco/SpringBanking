@@ -33,7 +33,8 @@ public class BankProductController {
     @GetMapping("/product/{id}/balance")
     @ResponseStatus(HttpStatus.OK)
     public Money getBankProductBalance(@PathVariable Integer id) {
-        return this.bankProductService.getProductBalance(id);
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return this.bankProductService.getProductBalance(id, user);
     }
 
     @PostMapping("/product/")

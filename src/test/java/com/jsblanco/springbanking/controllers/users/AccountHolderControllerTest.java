@@ -2,9 +2,9 @@ package com.jsblanco.springbanking.controllers.users;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.Address;
-import com.jsblanco.springbanking.repositories.products.SavingsAccountRepository;
 import com.jsblanco.springbanking.repositories.users.AccountHolderRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,13 +34,12 @@ class AccountHolderControllerTest {
     private WebApplicationContext webApplicationContext;
     @Autowired
     private AccountHolderRepository accountHolderRepository;
-    @Autowired
-    private SavingsAccountRepository savingsAccountRepository;
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
+        objectMapper.registerModule(new JavaTimeModule());
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         this.accountHolderRepository.save(new AccountHolder("accountHolder1", LocalDate.of(1990, 1, 1), new Address()));
         this.accountHolderRepository.save(new AccountHolder("accountHolder2", LocalDate.of(1990, 1, 1), new Address()));
@@ -120,7 +119,6 @@ class AccountHolderControllerTest {
     void deleteAccountHolder() throws Exception {
         AccountHolder accountHolder = this.accountHolderRepository.findAll().get(0);
 
-        System.out.println(+accountHolder.getId());
         mockMvc.perform(delete("/holder/" + accountHolder.getId()))
                 .andExpect(status().isOk())
                 .andReturn();

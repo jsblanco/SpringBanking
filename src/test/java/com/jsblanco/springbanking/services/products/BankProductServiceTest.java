@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -75,25 +76,26 @@ class BankProductServiceTest {
         assertEquals(checkingAccount, this.bankProductService.get(checkingAccount.getId()));
         assertEquals(savingsAccount, this.bankProductService.get(savingsAccount.getId()));
         assertEquals(creditCard, this.bankProductService.get(creditCard.getId()));
+        assertThrows(ResponseStatusException.class, ()-> this.bankProductService.get(12345), "Should return an exception when fetching an ID not in the DB");
     }
 
     @Test
     void save() {
         CreditCard newCard = (CreditCard) this.bankProductService.save(new CreditCard(99, new BigDecimal(1111), holder2));
         assertEquals(newCard, this.bankProductService.get(newCard.getId()), "Should store new credit cards");
-        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.save(newCard), "Should not let save products if they're already in the db");
+        assertThrows(ResponseStatusException.class, () -> this.bankProductService.save(newCard), "Should not let save products if they're already in the db");
 
         SavingsAccount newSavingsAccount = (SavingsAccount) this.bankProductService.save(new SavingsAccount(2222, new BigDecimal(1000), holder1, "secret", new Date(), Status.ACTIVE));
         assertEquals(newSavingsAccount, this.bankProductService.get(newSavingsAccount.getId()), "Should store new saving accounts");
-        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.save(newSavingsAccount), "Should not let save products if they're already in the db");
+        assertThrows(ResponseStatusException.class, () -> this.bankProductService.save(newSavingsAccount), "Should not let save products if they're already in the db");
 
         CheckingAccount newCheckingAccount = (CheckingAccount) this.bankProductService.save(new CheckingAccount(3333, new BigDecimal(1000), holder1, "secret", new Date(), Status.ACTIVE));
         assertEquals(newCheckingAccount, this.bankProductService.get(newCheckingAccount.getId()), "Should store new checking accounts");
-        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.save(newCheckingAccount), "Should not let save products if they're already in the db");
+        assertThrows(ResponseStatusException.class, () -> this.bankProductService.save(newCheckingAccount), "Should not let save products if they're already in the db");
 
         StudentCheckingAccount newStudentCheckingAccount = (StudentCheckingAccount) this.bankProductService.save(new StudentCheckingAccount(new CheckingAccount(4444, new BigDecimal(1000), holder2, "secret", new Date(), Status.ACTIVE)));
         assertEquals(newStudentCheckingAccount, this.bankProductService.get(newStudentCheckingAccount.getId()), "Should store new student checking accounts");
-        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.save(newStudentCheckingAccount), "Should not let save products if they're already in the db");
+        assertThrows(ResponseStatusException.class, () -> this.bankProductService.save(newStudentCheckingAccount), "Should not let save products if they're already in the db");
     }
 
     @Test
@@ -106,21 +108,23 @@ class BankProductServiceTest {
         assertEquals(savingsAccount, this.bankProductService.update(savingsAccount));
         creditCard.setBalance(new Money(new BigDecimal(123)));
         assertEquals(creditCard, this.bankProductService.update(creditCard));
+        assertThrows(ResponseStatusException.class, ()-> this.bankProductService.update(new CreditCard()), "Should return an exception when attempting to update a product that is not in the DB");
+
     }
 
     @Test
     void delete() {
         this.bankProductService.delete(creditCard.getId());
-        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.get(creditCard.getId()), "Deleted product should no longer be in the DB");
-        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.delete(creditCard.getId()), "Should return an error when attempting to delete an account not in DB");
+        assertThrows(ResponseStatusException.class, () -> this.bankProductService.get(creditCard.getId()), "Deleted product should no longer be in the DB");
+        assertThrows(ResponseStatusException.class, () -> this.bankProductService.delete(creditCard.getId()), "Should return an error when attempting to delete an account not in DB");
     }
 
     @Test
     void getProductBalance() {
-        assertEquals(studentCheckingAccount.getBalance(), this.bankProductService.getProductBalance(studentCheckingAccount.getId()));
-        assertEquals(checkingAccount.getBalance(), this.bankProductService.getProductBalance(checkingAccount.getId()));
-        assertEquals(savingsAccount.getBalance(), this.bankProductService.getProductBalance(savingsAccount.getId()));
-        assertEquals(creditCard.getBalance(), this.bankProductService.getProductBalance(creditCard.getId()));
+        assertEquals(studentCheckingAccount.getBalance(), this.bankProductService.getProductBalance(studentCheckingAccount.getId(), holder2));
+        assertEquals(checkingAccount.getBalance(), this.bankProductService.getProductBalance(checkingAccount.getId(), holder1));
+        assertEquals(savingsAccount.getBalance(), this.bankProductService.getProductBalance(savingsAccount.getId(), holder1));
+        assertEquals(creditCard.getBalance(), this.bankProductService.getProductBalance(creditCard.getId(), holder1));
     }
 
     @Test
@@ -136,7 +140,6 @@ class BankProductServiceTest {
     @Test
     void getByOwner() {
         List<BankProduct> productList = this.bankProductService.getByOwner(holder1);
-        System.out.println(productList);
         assertEquals(3, productList.size());
         assertTrue(productList.contains(creditCard));
         assertTrue(productList.contains(savingsAccount));

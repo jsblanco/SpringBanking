@@ -122,7 +122,6 @@ class ThirdPartyControllerTest {
     void deleteThirdParty() throws Exception {
         ThirdParty thirdParty = this.thirdPartyRepository.findAll().get(0);
 
-        System.out.println(+thirdParty.getId());
         mockMvc.perform(delete("/thirdparty/" + thirdParty.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
