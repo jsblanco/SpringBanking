@@ -1,10 +1,14 @@
 package com.jsblanco.springbanking.controllers.users;
 
+import com.jsblanco.springbanking.models.users.Admin;
 import com.jsblanco.springbanking.models.users.ThirdParty;
+import com.jsblanco.springbanking.models.users.User;
 import com.jsblanco.springbanking.services.users.interfaces.ThirdPartyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -29,18 +33,27 @@ public class ThirdPartyController {
     @PostMapping("/thirdparty/")
     @ResponseStatus(HttpStatus.CREATED)
     public ThirdParty saveThirdParty(@RequestBody ThirdParty thirdParty) {
+        checkUserPrivileges();
         return this.thirdPartyService.save(thirdParty);
     }
 
     @PutMapping("/thirdparty/")
     @ResponseStatus(HttpStatus.CREATED)
     public ThirdParty updateThirdParty(@RequestBody ThirdParty thirdParty) {
+        checkUserPrivileges();
         return this.thirdPartyService.update(thirdParty);
     }
 
     @DeleteMapping("/thirdparty/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteThirdParty(@PathVariable Integer id) {
+        checkUserPrivileges();
         this.thirdPartyService.delete(id);
+    }
+
+    private void checkUserPrivileges() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!(user instanceof Admin))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This action can only be performed by an administrator");
     }
 }
