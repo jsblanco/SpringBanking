@@ -1,7 +1,5 @@
 package com.jsblanco.springbanking.services.products;
 
-import com.jsblanco.springbanking.dao.ThirdPartyTransferDao;
-import com.jsblanco.springbanking.dao.TransferFundsDao;
 import com.jsblanco.springbanking.models.products.*;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.users.Admin;
@@ -29,6 +27,7 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
+import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -64,11 +63,11 @@ class BankProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        admin = adminRepository.save(new Admin("Admin", "Password"));
-        holder1 = accountHolderRepository.save(new AccountHolder("Holder1", "Password1", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
-        holder2 = accountHolderRepository.save(new AccountHolder("Holder2", "Password2", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
-        thirdParty1 = thirdPartyRepository.save(new ThirdParty("Third party 1", "password1", "Secret key 1"));
-        thirdParty2 = thirdPartyRepository.save(new ThirdParty("Third party 2", "password2", "Secret key 2"));
+        admin = adminRepository.save(new Admin("Admin", randomUUID().toString(), "Password"));
+        holder1 = accountHolderRepository.save(new AccountHolder("Holder1", randomUUID().toString(), "Password1", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
+        holder2 = accountHolderRepository.save(new AccountHolder("Holder2", randomUUID().toString(), "Password2", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
+        thirdParty1 = thirdPartyRepository.save(new ThirdParty("Third party 1", randomUUID().toString(), "Password1", "Secret key 1"));
+        thirdParty2 = thirdPartyRepository.save(new ThirdParty("Third party 2", randomUUID().toString(), "Password2", "Secret key 2"));
 
         creditCard = creditCardRepository.save(new CreditCard(1, new BigDecimal(1000), holder1));
         savingsAccount = savingsAccountRepository.save(new SavingsAccount(2, new BigDecimal(1000), holder1, "secret savings", new Date(), Status.ACTIVE));
@@ -174,59 +173,5 @@ class BankProductServiceTest {
         assertTrue(productList.contains(savingsAccount));
         assertTrue(productList.contains(checkingAccount));
         assertFalse(productList.contains(studentCheckingAccount));
-    }
-
-    @Test
-    void transferFunds() {
-        this.bankProductService.transferFunds(new TransferFundsDao(new Money(new BigDecimal(100)), checkingAccount.getId(), savingsAccount.getId(), "Holder1"), holder1);
-        assertEquals(new Money(new BigDecimal(900)), this.bankProductService.get(checkingAccount.getId()).getBalance());
-        assertEquals(new Money(new BigDecimal(1100)), this.bankProductService.get(savingsAccount.getId()).getBalance());
-
-        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.transferFunds(new TransferFundsDao(new Money(new BigDecimal(1)), checkingAccount.getId(), savingsAccount.getId(), "Holder1"), holder2), "Should fail when user does not own emitter account");
-        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.transferFunds(new TransferFundsDao(new Money(new BigDecimal(1)), checkingAccount.getId(), savingsAccount.getId(), "Wrong User"), holder1), "Should fail when specified username does not meet any of recipient account's owners' names");
-        assertThrows(IllegalArgumentException.class, () -> this.bankProductService.transferFunds(new TransferFundsDao(new Money(new BigDecimal(99999)), checkingAccount.getId(), savingsAccount.getId(), "Holder1"), holder1), "Should fail when emitter account does not have enough funds");
-    }
-
-    @Test
-    void thirdPartyOperation() {
-        ThirdPartyTransferDao dao = new ThirdPartyTransferDao();
-        dao.setAccountId(checkingAccount.getId());
-        dao.setSecretKey(checkingAccount.getSecretKey());
-        dao.setTransfer(new Money(new BigDecimal(10)));
-
-        Money expectedBalance = checkingAccount.getBalance();
-        expectedBalance.increaseAmount(new Money(new BigDecimal(10)));
-
-        bankProductService.thirdPartyOperation(thirdParty1.getHashedKey(), dao, thirdParty1);
-        assertEquals(expectedBalance, bankProductService.get(checkingAccount.getId()).getBalance(), "Should increase account balance when data is correct and transfer amount is positive");
-
-        dao.setTransfer(new Money(new BigDecimal(-10)));
-        expectedBalance.decreaseAmount(new Money(new BigDecimal(-10)));
-
-        bankProductService.thirdPartyOperation(thirdParty1.getHashedKey(), dao, thirdParty1);
-        assertEquals(expectedBalance, bankProductService.get(checkingAccount.getId()).getBalance(), "Should decrease account balance when data is correct and transfer amount is negative");
-
-        dao.setAccountId(savingsAccount.getId());
-        dao.setSecretKey(savingsAccount.getSecretKey());
-        expectedBalance = savingsAccount.getBalance();
-        expectedBalance.decreaseAmount(new Money(new BigDecimal(-10)));
-        bankProductService.thirdPartyOperation(thirdParty1.getHashedKey(), dao, thirdParty1);
-        assertEquals(expectedBalance, bankProductService.get(savingsAccount.getId()).getBalance(), "Should work with savings accounts");
-
-        dao.setAccountId(studentCheckingAccount.getId());
-        dao.setSecretKey(studentCheckingAccount.getSecretKey());
-        expectedBalance = studentCheckingAccount.getBalance();
-        expectedBalance.decreaseAmount(new Money(new BigDecimal(-10)));
-        bankProductService.thirdPartyOperation(thirdParty1.getHashedKey(), dao, thirdParty1);
-        assertEquals(expectedBalance, bankProductService.get(savingsAccount.getId()).getBalance(), "Should work with student checking accounts");
-
-        dao.setSecretKey(savingsAccount.getSecretKey());
-        assertThrows(ResponseStatusException.class, () -> bankProductService.thirdPartyOperation(thirdParty1.getHashedKey(), dao, thirdParty1), "Should throw an error when provided secret key does not match with that of the provided account");
-
-        dao.setAccountId(creditCard.getId());
-        assertThrows(ResponseStatusException.class, () -> bankProductService.thirdPartyOperation(thirdParty1.getHashedKey(), dao, thirdParty1), "Should throw an error when trying to operate with a credit card");
-
-        dao.setSecretKey(thirdParty2.getHashedKey());
-        assertThrows(ResponseStatusException.class, () -> bankProductService.thirdPartyOperation(thirdParty1.getHashedKey(), dao, thirdParty1), "Should throw an error when provided hash key differs from that of the user");
     }
 }

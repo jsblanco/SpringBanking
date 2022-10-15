@@ -21,6 +21,9 @@ public abstract class Account extends BankProduct {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @Transient
+    final BigDecimal penaltyFee = new BigDecimal("40");
+
     public Account() {
     }
 
@@ -71,5 +74,9 @@ public abstract class Account extends BankProduct {
                     && creationDate.equals(account.getCreationDate())
                     && status.equals(account.getStatus());
         return false;
+    }
+
+    public BigDecimal getPenaltyFee() {
+        return penaltyFee;
     }
 }

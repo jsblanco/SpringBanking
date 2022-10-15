@@ -45,9 +45,6 @@ public abstract class BankProduct implements HasBalance {
     @JoinColumn(name = "secondary_owner", nullable = true)
     private AccountHolder secondaryOwner;
 
-    @Transient
-    final BigDecimal penaltyFee = new BigDecimal("40");
-
     public BankProduct() {
     }
 
@@ -132,11 +129,6 @@ public abstract class BankProduct implements HasBalance {
 
     public void setSecondaryOwner(@Nullable AccountHolder secondaryOwner) {
         if (secondaryOwner == null || !secondaryOwner.equals(this.primaryOwner)) this.secondaryOwner = secondaryOwner;
-    }
-
-    @NotNull
-    public BigDecimal getPenaltyFee() {
-        return penaltyFee;
     }
 
     @Override

@@ -35,8 +35,8 @@ public class AccountHolder extends User {
     public AccountHolder() {
     }
 
-    public AccountHolder(String name, String password, @NotNull LocalDate birthDay, @NotNull Address primaryAddress) {
-        super(name, password);
+    public AccountHolder(String name, String username, String password, @NotNull LocalDate birthDay, @NotNull Address primaryAddress) {
+        super(name, username, password);
         this.birthDay = birthDay;
         this.primaryAddress = primaryAddress;
     }

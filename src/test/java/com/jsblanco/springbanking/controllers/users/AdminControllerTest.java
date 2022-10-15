@@ -18,6 +18,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
+import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -37,9 +38,9 @@ class AdminControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        adminRepository.save(new Admin("admin1", "password1"));
-        adminRepository.save(new Admin("admin2", "password2"));
-        adminRepository.save(new Admin( "admin3", "password3"));
+        adminRepository.save(new Admin("admin1", randomUUID().toString(),"password1"));
+        adminRepository.save(new Admin("admin2", randomUUID().toString(), "password2"));
+        adminRepository.save(new Admin( "admin3", randomUUID().toString(), "password3"));
     }
 
     @AfterEach
@@ -77,7 +78,7 @@ class AdminControllerTest {
 
     @Test
     void saveAdmin() throws Exception {
-        Admin newAdmin = new Admin("admin4", "password4");
+        Admin newAdmin = new Admin("admin4", randomUUID().toString(), "password4");
         String payload = objectMapper.writeValueAsString(newAdmin);
         MvcResult mvcResult = mockMvc.perform(post("/admin/")
                         .content(payload)

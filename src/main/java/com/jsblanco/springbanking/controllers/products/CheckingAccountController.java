@@ -2,7 +2,7 @@ package com.jsblanco.springbanking.controllers.products;
 
 import com.jsblanco.springbanking.models.products.Account;
 import com.jsblanco.springbanking.models.products.CheckingAccount;
-import com.jsblanco.springbanking.services.products.interfaces.util.AccountService;
+import com.jsblanco.springbanking.services.products.interfaces.AccountService;
 import com.jsblanco.springbanking.services.products.interfaces.CheckingAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

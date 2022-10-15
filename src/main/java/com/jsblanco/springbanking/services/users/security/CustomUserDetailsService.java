@@ -1,4 +1,4 @@
-package com.jsblanco.springbanking.services.users;
+package com.jsblanco.springbanking.services.users.security;
 
 import com.jsblanco.springbanking.config.CustomUserDetails;
 import com.jsblanco.springbanking.models.users.User;

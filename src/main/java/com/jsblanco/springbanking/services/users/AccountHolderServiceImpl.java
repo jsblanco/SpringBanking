@@ -54,7 +54,7 @@ public class AccountHolderServiceImpl implements AccountHolderService {
     }
 
     @Override
-    public List<AccountHolder> getByUsername(String name) {
-        return this.accountHolderRepository.getAccountHoldersByName(name);
+    public AccountHolder getByUsername(String name) {
+        return this.accountHolderRepository.getAccountHolderByUsername(name);
     }
 }

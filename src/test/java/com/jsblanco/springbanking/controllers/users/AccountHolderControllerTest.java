@@ -26,6 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.time.LocalDate;
 import java.util.List;
 
+import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -51,11 +52,11 @@ class AccountHolderControllerTest {
     void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        this.accountHolderRepository.save(new AccountHolder("accountHolder1", "password1", LocalDate.of(1990, 1, 1), new Address("1","2","3","4")));
-        this.accountHolderRepository.save(new AccountHolder("accountHolder2", "password2", LocalDate.of(1990, 1, 1), new Address("1","2","3","4")));
-        this.accountHolderRepository.save(new AccountHolder("accountHolder3", "password3", LocalDate.of(1990, 1, 1), new Address("1","2","3","4")));
+        this.accountHolderRepository.save(new AccountHolder("accountHolder1", randomUUID().toString(), "password1", LocalDate.of(1990, 1, 1), new Address("1","2","3","4")));
+        this.accountHolderRepository.save(new AccountHolder("accountHolder2", randomUUID().toString(), "password2", LocalDate.of(1990, 1, 1), new Address("1","2","3","4")));
+        this.accountHolderRepository.save(new AccountHolder("accountHolder3", randomUUID().toString(), "password3", LocalDate.of(1990, 1, 1), new Address("1","2","3","4")));
 
-        Admin admin = adminRepository.save(new Admin("Admin", "password"));
+        Admin admin = adminRepository.save(new Admin("Admin", randomUUID().toString(), "password"));
         Authentication authentication = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -98,7 +99,7 @@ class AccountHolderControllerTest {
 
     @Test
     void saveAccountHolder() throws Exception {
-        AccountHolder newAccountHolder = new AccountHolder("accountHolder4", "Password4", LocalDate.of(1990, 1, 1), new Address());
+        AccountHolder newAccountHolder = new AccountHolder("accountHolder4", randomUUID().toString(), "Password4", LocalDate.of(1990, 1, 1), new Address());
         String payload = objectMapper.writeValueAsString(newAccountHolder);
         MvcResult mvcResult = mockMvc.perform(post("/holder/")
                         .content(payload)

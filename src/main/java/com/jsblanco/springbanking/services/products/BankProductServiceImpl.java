@@ -1,11 +1,8 @@
 package com.jsblanco.springbanking.services.products;
 
-import com.jsblanco.springbanking.dao.ThirdPartyTransferDao;
-import com.jsblanco.springbanking.dao.TransferFundsDao;
 import com.jsblanco.springbanking.models.products.*;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.users.Admin;
-import com.jsblanco.springbanking.models.users.ThirdParty;
 import com.jsblanco.springbanking.models.users.User;
 import com.jsblanco.springbanking.models.util.Money;
 import com.jsblanco.springbanking.services.products.interfaces.*;
@@ -118,32 +115,6 @@ public class BankProductServiceImpl implements BankProductService {
         return accounts.stream().toList();
     }
 
-    @Override
-    public List<BankProduct> transferFunds(TransferFundsDao dao, User user) {
-        BankProduct emitterAcc = this.get(dao.getEmitterId());
-        BankProduct recipientAcc = this.get(dao.getRecipientId());
-
-        if (emitterAcc == null) throw new IllegalArgumentException("Emitter account not found in the db");
-        if (recipientAcc == null) throw new IllegalArgumentException("Recipient account not found in the db");
-
-        if (!emitterAcc.getPrimaryOwner().equals(user) && (emitterAcc.getSecondaryOwner() == null || !emitterAcc.getSecondaryOwner().equals(user)))
-            throw new IllegalArgumentException("Logged user does not own emitter account");
-
-        if (recipientAcc.getPrimaryOwner().areNamesDifferent(dao.getRecipientName())
-                && (recipientAcc.getSecondaryOwner() == null || recipientAcc.getSecondaryOwner().areNamesDifferent(dao.getRecipientName()))) {
-            throw new IllegalArgumentException("Specified person does not own recipient account");
-        }
-
-        if (emitterAcc.getBalance().getAmount().compareTo(dao.getTransaction().getAmount()) < 0) {
-            throw new IllegalArgumentException("Emitter account balance is insufficient to fulfill transactions");
-        }
-
-        emitterAcc.decreaseBalance(dao.getTransaction());
-        recipientAcc.increaseBalance(dao.getTransaction());
-
-        return new ArrayList<>(Arrays.asList(this.update(emitterAcc), this.update(recipientAcc)));
-    }
-
     private BankProductSubclassService fetchProductRepository(BankProduct bankProduct) {
         if (CreditCard.class.equals(bankProduct.getClass())) {
             return this.creditCardService;
@@ -159,29 +130,5 @@ public class BankProductServiceImpl implements BankProductService {
         }
 
         throw new IllegalArgumentException("Product not recognised");
-    }
-
-    public void thirdPartyOperation(String hashedKey, ThirdPartyTransferDao transferData, User user) {
-        if (!(user instanceof ThirdParty))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This action can only be performed by a third party user");
-        if (!((ThirdParty) user).getHashedKey().equals(hashedKey))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Provided hashed key does not match logged user");
-
-        Account account = getAccount(transferData.getAccountId());
-        if (!account.getSecretKey().equals(transferData.getSecretKey()))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Provided secret key does not match requested account");
-
-        if (transferData.getTransfer().getAmount().compareTo(BigDecimal.ZERO) > 0)
-            account.increaseBalance(transferData.getTransfer());
-        else
-            account.decreaseBalance(transferData.getTransfer());
-
-        this.update(account);
-    }
-
-    private Account getAccount(Integer accountId) {
-        BankProduct account = get(accountId);
-        if (account instanceof Account) return (Account) account;
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Could not find an account with the provided ID");
     }
 }

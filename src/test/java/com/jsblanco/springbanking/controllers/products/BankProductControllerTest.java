@@ -82,9 +82,9 @@ class BankProductControllerTest {
         objectMapper.registerModule(new JavaTimeModule());
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        admin = adminRepository.save(new Admin("Admin", "password"));
-        holder1 = accountHolderRepository.save(new AccountHolder("Holder1", "Password1", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
-        holder2 = accountHolderRepository.save(new AccountHolder("Holder2", "Password2", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
+        admin = adminRepository.save(new Admin("Admin", "BankProductControllerTestAdmin", "password"));
+        holder1 = accountHolderRepository.save(new AccountHolder("Holder1", "BankProductControllerTestHolder1","Password1", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
+        holder2 = accountHolderRepository.save(new AccountHolder("Holder2","BankProductControllerTestHolder2", "Password2", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
 
         creditCard = creditCardRepository.save(new CreditCard(1, new BigDecimal(1000), holder1));
         savingsAccount = savingsAccountRepository.save(new SavingsAccount(2, new BigDecimal(1000), holder1, "secret", new Date(), Status.ACTIVE));
@@ -182,25 +182,6 @@ class BankProductControllerTest {
     }
 
     @Test
-    void saveBankProducts() throws Exception {
-        CreditCard newCreditCard = new CreditCard();
-        newCreditCard.setBalance(new Money(new BigDecimal(10000)));
-        newCreditCard.setPrimaryOwner(holder1);
-        String payload = objectMapper.writeValueAsString(newCreditCard);
-        MvcResult mvcResult = mockMvc.perform(post("/product/")
-                        .content(payload)
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andReturn();
-
-        CreditCard fetchedCreditCard = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), CreditCard.class);
-        assertEquals(fetchedCreditCard.getBalance(), newCreditCard.getBalance());
-        assertEquals(fetchedCreditCard.getPrimaryOwner(), newCreditCard.getPrimaryOwner());
-    }
-
-    @Test
     void transferFundsBetweenProducts() throws Exception {
         Money transfer = new Money(new BigDecimal(10));
         TransferFundsDao transferFundsDao = new TransferFundsDao(transfer, checkingAccount.getId(), savingsAccount.getId(), holder1.getName());
@@ -225,33 +206,5 @@ class BankProductControllerTest {
         assertEquals(fetchedSavingsAccount.get(0).getBalance(), expectedEmitterBalance);
         assertEquals(fetchedSavingsAccount.get(1).getBalance(), expectedRecipientBalance);
 
-    }
-
-    @Test
-    void updateBankProducts() throws Exception {
-        checkingAccount.setBalance(new Money(new BigDecimal(10000)));
-        checkingAccount.setPrimaryOwner(holder2);
-        String payload = objectMapper.writeValueAsString(checkingAccount);
-        MvcResult mvcResult = mockMvc.perform(put("/product/")
-                        .content(payload)
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andReturn();
-
-        CheckingAccount fetchedCheckingAccount = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), CheckingAccount.class);
-        assertEquals(fetchedCheckingAccount, checkingAccount);
-    }
-
-    @Test
-    void deleteBankProducts() throws Exception {
-        mockMvc.perform(delete("/product/" + savingsAccount.getId()))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        mockMvc.perform(get("/product/" + savingsAccount.getId()))
-                .andExpect(status().isNotFound())
-                .andReturn();
     }
 }

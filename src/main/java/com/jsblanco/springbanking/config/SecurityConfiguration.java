@@ -1,11 +1,12 @@
 package com.jsblanco.springbanking.config;
 
-import com.jsblanco.springbanking.services.users.CustomUserDetailsService;
+import com.jsblanco.springbanking.services.users.security.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,7 +37,8 @@ public class SecurityConfiguration {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.httpBasic();
+//        http.httpBasic();
+        http.formLogin(Customizer.withDefaults());
         http.csrf().disable();
         http.authorizeRequests()
                 .mvcMatchers(HttpMethod.GET, "/").anonymous()

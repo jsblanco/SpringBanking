@@ -24,6 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
+import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -48,11 +49,11 @@ class ThirdPartyControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        thirdPartyRepository.save(new ThirdParty("thirdParty1", "password1", "hash1"));
-        thirdPartyRepository.save(new ThirdParty("thirdParty2", "password2", "hash2"));
-        thirdPartyRepository.save(new ThirdParty("thirdParty3", "password3", "hash3"));
+        thirdPartyRepository.save(new ThirdParty("thirdParty1",randomUUID().toString() ,"password1", "hash1"));
+        thirdPartyRepository.save(new ThirdParty("thirdParty2",randomUUID().toString() ,"password2", "hash2"));
+        thirdPartyRepository.save(new ThirdParty("thirdParty3",randomUUID().toString() ,"password3", "hash3"));
 
-        Admin admin = adminRepository.save(new Admin("Admin", "password"));
+        Admin admin = adminRepository.save(new Admin("Admin", randomUUID().toString(), "password"));
         Authentication authentication = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -97,9 +98,8 @@ class ThirdPartyControllerTest {
 
     @Test
     void saveThirdParty() throws Exception {
-
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(new Admin("Admin", "Password"));
-        ThirdParty newThirdParty = new ThirdParty("thirdParty4", "password4", "hash4");
+//        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(new Admin("Admin", "" "Password"));
+        ThirdParty newThirdParty = new ThirdParty("thirdParty4", randomUUID().toString(), "password4", "hash4");
         String payload = objectMapper.writeValueAsString(newThirdParty);
 
         MockHttpServletRequestBuilder query = post("/thirdparty/").content(payload).contentType(MediaType.APPLICATION_JSON);
