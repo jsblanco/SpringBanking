@@ -1,6 +1,6 @@
 package com.jsblanco.springbanking.models.util;
 
-import org.springframework.lang.NonNull;
+import javax.validation.constraints.NotNull;
 
 import java.math.RoundingMode;
 import java.math.BigDecimal;
@@ -62,7 +62,7 @@ public class Money {
         return this.currency;
     }
 
-    public void setCurrency(@NonNull Currency currency) {
+    public void setCurrency(@NotNull Currency currency) {
         this.currency = currency;
     }
 

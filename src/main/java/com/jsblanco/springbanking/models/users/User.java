@@ -3,17 +3,16 @@ package com.jsblanco.springbanking.models.users;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-
-import org.springframework.lang.NonNull;
+import javax.validation.constraints.NotNull;
 
 @MappedSuperclass
 public abstract class User {
     @Id
     @GeneratedValue
     private Integer id;
-    @NonNull
+    @NotNull
     private String name;
-    @NonNull
+    @NotNull
     private String password;
 
     public User() {
@@ -39,12 +38,12 @@ public abstract class User {
         this.name = name;
     }
 
-    @NonNull
+    @NotNull
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(@NonNull String password) {
+    public void setPassword(@NotNull String password) {
         this.password = password;
     }
 

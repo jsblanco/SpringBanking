@@ -1,11 +1,11 @@
 package com.jsblanco.springbanking.models.users;
 
 import javax.persistence.Entity;
-import org.springframework.lang.NonNull;
+import javax.validation.constraints.NotNull;
 
 @Entity
 public class ThirdParty extends User {
-    @NonNull
+    @NotNull
     private String hashedKey;
 
     public ThirdParty() {

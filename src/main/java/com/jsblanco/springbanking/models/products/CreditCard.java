@@ -1,5 +1,6 @@
 package com.jsblanco.springbanking.models.products;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,7 +9,7 @@ import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Money;
 
-import org.springframework.lang.NonNull;
+import javax.validation.constraints.NotNull;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
@@ -26,25 +27,25 @@ import java.util.Date;
 @DiscriminatorValue("credit_card")
 public class CreditCard extends BankProduct implements HasInterestRate {
 
-    @NonNull
+    @NotNull
     @DecimalMax(value = "100000.00")
     private BigDecimal creditLimit;
-    @NonNull
-    @DecimalMin(value = "0.2000")
+    @NotNull
+    @DecimalMax(value = "0.2000")
     @DecimalMin(value = "0.1000")
     @Digits(integer = 1, fraction = 4)
     @Column(precision = 1, scale = 4)
     private BigDecimal interestRate;
-    @NonNull
+    @NotNull @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-mm-dd")
     private Date lastMaintenanceDate;
 
-    @Transient
+    @Transient @JsonIgnore
     private static final BigDecimal defaultInterestRate = new BigDecimal("0.2000");
-    @Transient
+    @Transient @JsonIgnore
     private static final BigDecimal minInterestRate = new BigDecimal("0.1000");
-    @Transient
+    @Transient @JsonIgnore
     private static final BigDecimal defaultCreditLimit = new BigDecimal("100.00");
-    @Transient
+    @Transient @JsonIgnore
     private static final BigDecimal maxCreditLimit = new BigDecimal("100000.00");
 
     public CreditCard() {
@@ -74,7 +75,7 @@ public class CreditCard extends BankProduct implements HasInterestRate {
     }
 
     @JsonProperty("creditLimit")
-    public void setCreditLimit(@NonNull BigDecimal creditLimit) {
+    public void setCreditLimit(@NotNull BigDecimal creditLimit) {
         if (maxCreditLimit.compareTo(creditLimit) < 0)
             throw new IllegalArgumentException("Credit limit cannot be bigger than " + maxCreditLimit);
         this.creditLimit = creditLimit;
@@ -97,12 +98,12 @@ public class CreditCard extends BankProduct implements HasInterestRate {
         return DateUtils.getPeriodBetweenDates(lastMaintenanceDate, today).getMonths();
     }
 
-    @NonNull
+    @NotNull
     public Date getLastMaintenanceDate() {
         return lastMaintenanceDate;
     }
 
-    public void setLastMaintenanceDate(@NonNull Date lastMaintenanceDate) {
+    public void setLastMaintenanceDate(@NotNull Date lastMaintenanceDate) {
         int overduePeriods = getOverduePeriods(lastMaintenanceDate);
         BigDecimal monthlyInterestRate = getInterestRate().divide(new BigDecimal(12), RoundingMode.HALF_EVEN);
         if (overduePeriods > 0) {

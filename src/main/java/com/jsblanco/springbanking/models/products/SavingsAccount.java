@@ -7,7 +7,7 @@ import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Money;
 import com.jsblanco.springbanking.models.util.Status;
-import org.springframework.lang.NonNull;
+import javax.validation.constraints.NotNull;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
@@ -24,32 +24,31 @@ import java.util.Date;
 @DiscriminatorValue("savings_account")
 public class SavingsAccount extends Account implements HasInterestRate, HasMinimumBalance {
 
-    @NonNull
+    @NotNull
     @DecimalMax(value = "0.5000")
     @DecimalMin(value = "0.0001")
     @Digits(integer = 1, fraction = 4)
     @Column(precision = 1, scale = 4)
     private BigDecimal interestRate;
-    @NonNull
+    @NotNull
     @DecimalMin(value = "100.00")
     private BigDecimal minimumAmount;
-    @NonNull
+    @NotNull
     private Date lastMaintenanceDate;
 
-    @Transient
+    @Transient @JsonIgnore
     private static final BigDecimal defaultMinimumAmount = new BigDecimal("1000.00");
-    @Transient
+    @Transient @JsonIgnore
     private static final BigDecimal defaultInterestRate = new BigDecimal("0.0025");
-    @Transient
+    @Transient @JsonIgnore
     private static final BigDecimal maxInterestRate = new BigDecimal("0.5");
-    @Transient
+    @Transient @JsonIgnore
     private static final BigDecimal minInterestRate = new BigDecimal("0");
-    @Transient
+    @Transient @JsonIgnore
     private static final BigDecimal minMinimumAmount = new BigDecimal("100");
 
 
     public SavingsAccount() {
-        this.lastMaintenanceDate = DateUtils.today();
         setMinimumAmount(defaultMinimumAmount);
         setInterestRate(defaultInterestRate);
     }
@@ -104,13 +103,13 @@ public class SavingsAccount extends Account implements HasInterestRate, HasMinim
         return DateUtils.getPeriodBetweenDates(lastAccess, today).getYears();
     }
 
-
-    @NonNull
+    @NotNull
     public Date getLastMaintenanceDate() {
         return lastMaintenanceDate;
     }
 
-    public void setLastMaintenanceDate(@NonNull Date lastAccess) {
+    public void setLastMaintenanceDate(@NotNull Date lastAccess) {
+        if (this.lastMaintenanceDate == null) this.lastMaintenanceDate = lastAccess;
         int overduePeriods = getOverduePeriods(lastAccess);
         if (overduePeriods > 0) {
             setBalance(new Money(addInterest(getAmount(), interestRate, overduePeriods), getCurrency()));

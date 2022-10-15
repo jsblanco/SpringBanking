@@ -7,7 +7,7 @@ import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Money;
 import com.jsblanco.springbanking.models.util.Status;
-import org.springframework.lang.NonNull;
+import javax.validation.constraints.NotNull;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -19,7 +19,7 @@ import java.util.Date;
 @DiscriminatorValue("checking_account")
 public class CheckingAccount extends Account implements HasMinimumBalance, HasMaintenanceFee {
 
-    @NonNull
+    @NotNull
     private Date lastMaintenanceDate;
     @Transient
     private static final BigDecimal monthlyMaintenanceFee = new BigDecimal("12.00");
@@ -55,12 +55,12 @@ public class CheckingAccount extends Account implements HasMinimumBalance, HasMa
                 + (DateUtils.getPeriodBetweenDates(lastAccess, today).getYears() * 12);
     }
 
-    @NonNull
+    @NotNull
     public Date getLastMaintenanceDate() {
         return lastMaintenanceDate;
     }
 
-    public void setLastMaintenanceDate(@NonNull Date lastMaintenanceDate) {
+    public void setLastMaintenanceDate(@NotNull Date lastMaintenanceDate) {
         if (this.lastMaintenanceDate == null)
             this.lastMaintenanceDate = lastMaintenanceDate;
 

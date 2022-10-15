@@ -4,17 +4,17 @@ import com.jsblanco.springbanking.models.util.Address;
 
 import javax.persistence.*;
 
-import org.springframework.lang.NonNull;
+import javax.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
 @Entity
 public class AccountHolder extends User {
-    @NonNull
+    @NotNull
     private LocalDate birthDay;
 
     @Embedded
-    @NonNull
+    @NotNull
     @AttributeOverrides({
             @AttributeOverride(name = "door", column = @Column(name = "primary_door")),
             @AttributeOverride(name = "postalCode", column = @Column(name = "primary_postal_code")),
@@ -35,7 +35,7 @@ public class AccountHolder extends User {
     public AccountHolder() {
     }
 
-    public AccountHolder(String name, @NonNull LocalDate birthDay, @NonNull Address primaryAddress) {
+    public AccountHolder(String name, @NotNull LocalDate birthDay, @NotNull Address primaryAddress) {
         super(name);
         this.birthDay = birthDay;
         this.primaryAddress = primaryAddress;

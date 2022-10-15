@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -28,13 +29,13 @@ public class AdminController {
 
     @PostMapping("/admin/")
     @ResponseStatus(HttpStatus.CREATED)
-    public Admin saveAdmin(@RequestBody Admin admin) {
+    public Admin saveAdmin(@RequestBody @Valid Admin admin) {
         return this.adminService.save(admin);
     }
 
     @PutMapping("/admin/")
     @ResponseStatus(HttpStatus.CREATED)
-    public Admin updateAdmin(@RequestBody Admin admin) {
+    public Admin updateAdmin(@RequestBody @Valid Admin admin) {
         return this.adminService.update(admin);
     }
 

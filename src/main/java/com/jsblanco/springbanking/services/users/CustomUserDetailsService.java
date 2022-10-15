@@ -41,8 +41,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 accountHolderService,
         }) {
             try {
-                User product = (User) serviceInterface.getByUsername(username);
-                if (product != null) return product;
+                User user = (User) serviceInterface.getByUsername(username);
+                if (user != null) return user;
             } catch (Exception ignored) {
             }
         }

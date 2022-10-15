@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -30,14 +31,14 @@ public class ThirdPartyController {
 
     @PostMapping("/thirdparty/")
     @ResponseStatus(HttpStatus.CREATED)
-    public ThirdParty saveThirdParty(@RequestBody ThirdParty thirdParty) {
+    public ThirdParty saveThirdParty(@RequestBody  @Valid ThirdParty thirdParty) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return this.thirdPartyService.save(thirdParty, user);
     }
 
     @PutMapping("/thirdparty/")
     @ResponseStatus(HttpStatus.CREATED)
-    public ThirdParty updateThirdParty(@RequestBody ThirdParty thirdParty) {
+    public ThirdParty updateThirdParty(@RequestBody  @Valid ThirdParty thirdParty) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return this.thirdPartyService.update(thirdParty, user);
     }

@@ -1,13 +1,14 @@
 package com.jsblanco.springbanking.models.products;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.jsblanco.springbanking.models.interfaces.HasBalance;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.Money;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
-import org.springframework.lang.NonNull;
+import javax.validation.constraints.NotNull;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
@@ -20,6 +21,12 @@ import java.util.Objects;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value= CreditCard.class , name="creditcard"),
+        @JsonSubTypes.Type(value= SavingsAccount.class, name="savingsaccount"),
+        @JsonSubTypes.Type(value= CheckingAccount.class, name="checkingaccount"),
+        @JsonSubTypes.Type(value= StudentCheckingAccount.class, name="studentcheckingaccount")
+})
 @DiscriminatorColumn(name = "product_type")
 public abstract class BankProduct implements HasBalance {
     @Id
@@ -104,12 +111,12 @@ public abstract class BankProduct implements HasBalance {
         this.currency = currency;
     }
 
-    @NonNull
+    @NotNull
     public AccountHolder getPrimaryOwner() {
         return primaryOwner;
     }
 
-    public void setPrimaryOwner(@NonNull AccountHolder primaryOwner) {
+    public void setPrimaryOwner(@NotNull AccountHolder primaryOwner) {
         this.primaryOwner = primaryOwner;
         if ((secondaryOwner != null) && secondaryOwner.equals(this.primaryOwner)) setSecondaryOwner(null);
     }
@@ -127,7 +134,7 @@ public abstract class BankProduct implements HasBalance {
         if (secondaryOwner == null || !secondaryOwner.equals(this.primaryOwner)) this.secondaryOwner = secondaryOwner;
     }
 
-    @NonNull
+    @NotNull
     public BigDecimal getPenaltyFee() {
         return penaltyFee;
     }

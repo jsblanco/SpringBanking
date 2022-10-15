@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -29,13 +30,13 @@ public class AccountHolderController {
 
     @PostMapping("/holder/")
     @ResponseStatus(HttpStatus.CREATED)
-    public AccountHolder saveAccountHolder(@RequestBody AccountHolder accountHolder) {
+    public AccountHolder saveAccountHolder(@RequestBody @Valid AccountHolder accountHolder) {
         return this.accountHolderService.save(accountHolder);
     }
 
     @PutMapping("/holder/")
     @ResponseStatus(HttpStatus.CREATED)
-    public AccountHolder updateAccountHolder(@RequestBody AccountHolder accountHolder) {
+    public AccountHolder updateAccountHolder(@RequestBody @Valid AccountHolder accountHolder) {
         return this.accountHolderService.update(accountHolder);
     }
 

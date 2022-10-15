@@ -4,7 +4,7 @@ import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Status;
 import javax.persistence.*;
-import org.springframework.lang.NonNull;
+import javax.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -13,9 +13,9 @@ import java.util.Date;
 @DiscriminatorValue("bank_account")
 public abstract class Account extends BankProduct {
 
-    @NonNull
+    @NotNull
     private String secretKey;
-    @NonNull
+    @NotNull
     private Date creationDate;
 
     @Enumerated(EnumType.STRING)
@@ -24,7 +24,7 @@ public abstract class Account extends BankProduct {
     public Account() {
     }
 
-    public Account(Integer id, BigDecimal amount, AccountHolder primaryOwner, @NonNull String secretKey, @NonNull Date creationDate, Status status) {
+    public Account(Integer id, BigDecimal amount, AccountHolder primaryOwner, @NotNull String secretKey, @NotNull Date creationDate, Status status) {
         super(id, amount, primaryOwner);
         this.secretKey = secretKey;
         this.creationDate = DateUtils.round(creationDate);

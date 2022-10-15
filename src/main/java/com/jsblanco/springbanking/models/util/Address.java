@@ -1,62 +1,62 @@
 package com.jsblanco.springbanking.models.util;
 
 import javax.persistence.Embeddable;
-import org.springframework.lang.NonNull;
+import javax.validation.constraints.NotNull;
 
 @Embeddable
 public class Address {
-    @NonNull
+    @NotNull
     private String door;
-    @NonNull
+    @NotNull
     private String postalCode;
-    @NonNull
+    @NotNull
     private String city;
-    @NonNull
+    @NotNull
     private String country;
 
     public Address() {
     }
 
-    public Address(@NonNull String door, @NonNull String postalCode, @NonNull String city, @NonNull String country) {
+    public Address(@NotNull String door, @NotNull String postalCode, @NotNull String city, @NotNull String country) {
         this.door = door;
         this.postalCode = postalCode;
         this.city = city;
         this.country = country;
     }
 
-    @NonNull
+    @NotNull
     public String getDoor() {
         return door;
     }
 
-    public void setDoor(@NonNull String houseInfo) {
+    public void setDoor(@NotNull String houseInfo) {
         this.door = houseInfo;
     }
 
-    @NonNull
+    @NotNull
     public String getPostalCode() {
         return postalCode;
     }
 
-    public void setPostalCode(@NonNull String postalCode) {
+    public void setPostalCode(@NotNull String postalCode) {
         this.postalCode = postalCode;
     }
 
-    @NonNull
+    @NotNull
     public String getCity() {
         return city;
     }
 
-    public void setCity(@NonNull String city) {
+    public void setCity(@NotNull String city) {
         this.city = city;
     }
 
-    @NonNull
+    @NotNull
     public String getCountry() {
         return country;
     }
 
-    public void setCountry(@NonNull String country) {
+    public void setCountry(@NotNull String country) {
         this.country = country;
     }
 

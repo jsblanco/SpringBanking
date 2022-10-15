@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -40,34 +41,34 @@ public class BankProductController {
 
     @PostMapping("/product/{id}/balance")
     @ResponseStatus(HttpStatus.CREATED)
-    public Money modifyBankProductBalance(@PathVariable Integer id, @RequestBody Money newBalance) {
+    public Money modifyBankProductBalance(@PathVariable Integer id, @RequestBody  @Valid Money newBalance) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return this.bankProductService.modifyProductBalance(id, newBalance, user);
     }
 
     @PostMapping("/product/")
     @ResponseStatus(HttpStatus.CREATED)
-    public BankProduct saveBankProducts(@RequestBody BankProduct product) {
+    public BankProduct saveBankProducts(@RequestBody  @Valid BankProduct product) {
         return this.bankProductService.save(product);
     }
 
     @PostMapping("/product/transfer")
     @ResponseStatus(HttpStatus.CREATED)
-    public List<BankProduct> transferFundsBetweenProducts(@RequestBody TransferFundsDao dao) {
+    public List<BankProduct> transferFundsBetweenProducts(@RequestBody  @Valid TransferFundsDao dao) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return this.bankProductService.transferFunds(dao, user);
     }
 
     @PostMapping("/product/thirdparty")
     @ResponseStatus(HttpStatus.CREATED)
-    public void thirdPartyOperation(@RequestHeader String hashedKey, @RequestBody ThirdPartyTransferDao dao) {
+    public void thirdPartyOperation(@RequestHeader String hashedKey, @RequestBody  @Valid ThirdPartyTransferDao dao) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         this.bankProductService.thirdPartyOperation(hashedKey, dao, user);
     }
 
     @PutMapping("/product/")
     @ResponseStatus(HttpStatus.CREATED)
-    public BankProduct updateBankProducts(@RequestBody BankProduct product) {
+    public BankProduct updateBankProducts(@RequestBody  @Valid BankProduct product) {
         return this.bankProductService.update(product);
     }
 
