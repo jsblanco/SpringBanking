@@ -2,9 +2,9 @@ package com.jsblanco.springbanking.controllers.users;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.users.Admin;
 import com.jsblanco.springbanking.models.users.ThirdParty;
+import com.jsblanco.springbanking.repositories.users.AdminRepository;
 import com.jsblanco.springbanking.repositories.users.ThirdPartyRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,22 +39,25 @@ class ThirdPartyControllerTest {
     private WebApplicationContext webApplicationContext;
     @Autowired
     private ThirdPartyRepository thirdPartyRepository;
+    @Autowired
+    private AdminRepository adminRepository;
+
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        thirdPartyRepository.save(new ThirdParty("thirdParty1", "hash1"));
-        thirdPartyRepository.save(new ThirdParty("thirdParty2", "hash2"));
-        thirdPartyRepository.save(new ThirdParty("thirdParty3", "hash3"));
+        thirdPartyRepository.save(new ThirdParty("thirdParty1", "password1", "hash1"));
+        thirdPartyRepository.save(new ThirdParty("thirdParty2", "password2", "hash2"));
+        thirdPartyRepository.save(new ThirdParty("thirdParty3", "password3", "hash3"));
 
-
+        Admin admin = adminRepository.save(new Admin("Admin", "password"));
         Authentication authentication = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(null);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(admin);
     }
 
     @AfterEach
@@ -95,21 +98,17 @@ class ThirdPartyControllerTest {
     @Test
     void saveThirdParty() throws Exception {
 
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(new Admin());
-        ThirdParty newThirdParty = new ThirdParty("thirdParty4", "hash4");
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(new Admin("Admin", "Password"));
+        ThirdParty newThirdParty = new ThirdParty("thirdParty4", "password4", "hash4");
         String payload = objectMapper.writeValueAsString(newThirdParty);
 
         MockHttpServletRequestBuilder query = post("/thirdparty/").content(payload).contentType(MediaType.APPLICATION_JSON);
-        ensureNonAdminsCannotRunThisQuery(query);
-
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(new Admin());
         MvcResult mvcResult = mockMvc.perform(query)
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
 
         ThirdParty thirdParty = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ThirdParty.class);
-
         assertEquals(thirdParty.getName(), "thirdParty4");
         assertEquals(thirdParty.getHashedKey(), "hash4");
     }
@@ -122,9 +121,7 @@ class ThirdPartyControllerTest {
         String payload = objectMapper.writeValueAsString(updatedThirdParty);
 
         MockHttpServletRequestBuilder query = put("/thirdparty/").content(payload).contentType(MediaType.APPLICATION_JSON);
-        ensureNonAdminsCannotRunThisQuery(query);
 
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(new Admin());
         MvcResult mvcResult = mockMvc.perform(query)
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -141,9 +138,7 @@ class ThirdPartyControllerTest {
         ThirdParty thirdParty = this.thirdPartyRepository.findAll().get(0);
 
         MockHttpServletRequestBuilder query = delete("/thirdparty/" + thirdParty.getId());
-        ensureNonAdminsCannotRunThisQuery(query);
 
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(new Admin());
         mockMvc.perform(query)
                 .andExpect(status().isOk())
                 .andReturn();
@@ -153,12 +148,4 @@ class ThirdPartyControllerTest {
                 .andReturn();
     }
 
-    public void ensureNonAdminsCannotRunThisQuery(MockHttpServletRequestBuilder query) throws Exception {
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(null);
-        mockMvc.perform(query).andExpect(status().isForbidden());
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(new AccountHolder());
-        mockMvc.perform(query).andExpect(status().isForbidden());
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(new ThirdParty());
-        mockMvc.perform(query).andExpect(status().isForbidden());
-    }
 }

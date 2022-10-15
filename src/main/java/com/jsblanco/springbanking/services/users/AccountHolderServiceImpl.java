@@ -35,6 +35,8 @@ public class AccountHolderServiceImpl implements AccountHolderService {
         Optional<AccountHolder> accountHolder = this.accountHolderRepository.findById(account.getId());
         if (accountHolder.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
+        if (account.getPassword() == null)
+            account.setPassword(accountHolder.get().getPassword());
         return this.accountHolderRepository.save(account);
     }
 

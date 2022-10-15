@@ -82,9 +82,9 @@ class BankProductControllerTest {
         objectMapper.registerModule(new JavaTimeModule());
 
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        admin = adminRepository.save(new Admin());
-        holder1 = accountHolderRepository.save(new AccountHolder("Holder1", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
-        holder2 = accountHolderRepository.save(new AccountHolder("Holder2", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
+        admin = adminRepository.save(new Admin("Admin", "password"));
+        holder1 = accountHolderRepository.save(new AccountHolder("Holder1", "Password1", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
+        holder2 = accountHolderRepository.save(new AccountHolder("Holder2", "Password2", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
 
         creditCard = creditCardRepository.save(new CreditCard(1, new BigDecimal(1000), holder1));
         savingsAccount = savingsAccountRepository.save(new SavingsAccount(2, new BigDecimal(1000), holder1, "secret", new Date(), Status.ACTIVE));

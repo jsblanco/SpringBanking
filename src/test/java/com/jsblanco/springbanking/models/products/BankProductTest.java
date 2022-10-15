@@ -63,18 +63,18 @@ class BankProductTest {
     @DisplayName("Should return if the account is owned by the provided user, no matter if as the primary or secondary owner")
     @Test
     void isOwnedBy() {
-        AccountHolder primaryOwner = new AccountHolder("primaryOwner", LocalDate.now(), new Address());
+        AccountHolder primaryOwner = new AccountHolder("primaryOwner", "Password", LocalDate.now(), new Address());
         primaryOwner.setId(1);
         bankProduct.setPrimaryOwner(primaryOwner);
         assertTrue(bankProduct.isOwnedBy(primaryOwner), "Should return true when its primary owner is passed, even if secondary owner is null");
 
-        AccountHolder secondaryOwner = new AccountHolder("secondaryOwner", LocalDate.now(), new Address());
+        AccountHolder secondaryOwner = new AccountHolder("secondaryOwner", "Password", LocalDate.now(), new Address());
         secondaryOwner.setId(2);
         bankProduct.setSecondaryOwner(secondaryOwner);
         assertTrue(bankProduct.isOwnedBy(primaryOwner), "Should return true when its primary owner is passed and the secondary owner is not null");
         assertTrue(bankProduct.isOwnedBy(secondaryOwner), "Should return true when its secondary owner is passed");
 
-        AccountHolder nonOwner = new AccountHolder("nonOwner", LocalDate.now(), new Address());
+        AccountHolder nonOwner = new AccountHolder("nonOwner", "Password", LocalDate.now(), new Address());
         nonOwner.setId(3);
         assertFalse(bankProduct.isOwnedBy(nonOwner), "Should return false when a user that is neither its primary nor its secondary owner is passed");
     }

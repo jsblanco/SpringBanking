@@ -1,11 +1,9 @@
 package com.jsblanco.springbanking.controllers.users;
 
 import com.jsblanco.springbanking.models.users.ThirdParty;
-import com.jsblanco.springbanking.models.users.User;
 import com.jsblanco.springbanking.services.users.interfaces.ThirdPartyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -32,21 +30,18 @@ public class ThirdPartyController {
     @PostMapping("/thirdparty/")
     @ResponseStatus(HttpStatus.CREATED)
     public ThirdParty saveThirdParty(@RequestBody  @Valid ThirdParty thirdParty) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return this.thirdPartyService.save(thirdParty, user);
+        return this.thirdPartyService.save(thirdParty);
     }
 
     @PutMapping("/thirdparty/")
     @ResponseStatus(HttpStatus.CREATED)
     public ThirdParty updateThirdParty(@RequestBody  @Valid ThirdParty thirdParty) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return this.thirdPartyService.update(thirdParty, user);
+        return this.thirdPartyService.update(thirdParty);
     }
 
     @DeleteMapping("/thirdparty/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteThirdParty(@PathVariable Integer id) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        this.thirdPartyService.delete(id, user);
+        this.thirdPartyService.delete(id);
     }
 }

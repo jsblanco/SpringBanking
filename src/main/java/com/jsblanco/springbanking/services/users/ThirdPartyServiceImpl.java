@@ -1,8 +1,6 @@
 package com.jsblanco.springbanking.services.users;
 
-import com.jsblanco.springbanking.models.users.Admin;
 import com.jsblanco.springbanking.models.users.ThirdParty;
-import com.jsblanco.springbanking.models.users.User;
 import com.jsblanco.springbanking.repositories.users.ThirdPartyRepository;
 import com.jsblanco.springbanking.services.users.interfaces.ThirdPartyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +35,8 @@ public class ThirdPartyServiceImpl implements ThirdPartyService {
         Optional<ThirdParty> thirdParty = this.thirdPartyRepository.findById(account.getId());
         if (thirdParty.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
+        if (account.getPassword() == null)
+            account.setPassword(thirdParty.get().getPassword());
         return this.thirdPartyRepository.save(account);
     }
 
@@ -56,26 +56,5 @@ public class ThirdPartyServiceImpl implements ThirdPartyService {
     @Override
     public List<ThirdParty> getByUsername(String name) {
         return this.thirdPartyRepository.getThirdPartiesByName(name);
-    }
-
-    @Override
-    public ThirdParty save(ThirdParty account, User loggedUser) {
-        if (!(loggedUser instanceof Admin))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This action can only be performed by an administrator");
-        return this.save(account);
-    }
-
-    @Override
-    public ThirdParty update(ThirdParty account, User loggedUser) {
-        if (!(loggedUser instanceof Admin))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This action can only be performed by an administrator");
-        return this.update(account);
-    }
-
-    @Override
-    public void delete(Integer accountId, User loggedUser) {
-        if (!(loggedUser instanceof Admin))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This action can only be performed by an administrator");
-        this.delete(accountId);
     }
 }

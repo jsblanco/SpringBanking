@@ -86,15 +86,12 @@ public class BankProductServiceImpl implements BankProductService {
     }
 
     @Override
-    public Money modifyProductBalance(Integer id, Money balanceChange, User user) {
+    public Money modifyProductBalance(Integer id, Money balanceChange) {
         BankProduct product = get(id);
-        if (user instanceof Admin) {
-            if (balanceChange.getAmount().compareTo(BigDecimal.ZERO) > 0)
-                product.increaseBalance(balanceChange);
-            else product.decreaseBalance(balanceChange);
-            return update(product).getBalance();
-        }
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have access to this account's balance");
+        if (balanceChange.getAmount().compareTo(BigDecimal.ZERO) > 0)
+            product.increaseBalance(balanceChange);
+        else product.decreaseBalance(balanceChange);
+        return update(product).getBalance();
     }
 
     @Override
@@ -132,8 +129,8 @@ public class BankProductServiceImpl implements BankProductService {
         if (!emitterAcc.getPrimaryOwner().equals(user) && (emitterAcc.getSecondaryOwner() == null || !emitterAcc.getSecondaryOwner().equals(user)))
             throw new IllegalArgumentException("Logged user does not own emitter account");
 
-        if (!recipientAcc.getPrimaryOwner().areNamesEqual(dao.getRecipientName())
-                && (recipientAcc.getSecondaryOwner() == null || !recipientAcc.getSecondaryOwner().areNamesEqual(dao.getRecipientName()))) {
+        if (recipientAcc.getPrimaryOwner().areNamesDifferent(dao.getRecipientName())
+                && (recipientAcc.getSecondaryOwner() == null || recipientAcc.getSecondaryOwner().areNamesDifferent(dao.getRecipientName()))) {
             throw new IllegalArgumentException("Specified person does not own recipient account");
         }
 

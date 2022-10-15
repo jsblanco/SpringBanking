@@ -1,5 +1,8 @@
 package com.jsblanco.springbanking.models.users;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
@@ -12,14 +15,15 @@ public abstract class User {
     private Integer id;
     @NotNull
     private String name;
-    @NotNull
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     public User() {
     }
 
-    public User(String name) {
+    public User(String name, String password) {
         this.name = name;
+        this.password = password;
     }
 
     public Integer getId() {
@@ -38,7 +42,7 @@ public abstract class User {
         this.name = name;
     }
 
-    @NotNull
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
@@ -47,8 +51,8 @@ public abstract class User {
         this.password = password;
     }
 
-    public boolean areNamesEqual(String comparedName) {
-        return name.trim().toLowerCase().compareTo(comparedName.trim().toLowerCase()) == 0;
+    public boolean areNamesDifferent(String comparedName) {
+        return name.trim().toLowerCase().compareTo(comparedName.trim().toLowerCase()) != 0;
     }
 
     @Override

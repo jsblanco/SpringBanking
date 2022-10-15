@@ -35,6 +35,8 @@ public class AdminServiceImpl implements AdminService {
         Optional<Admin> admin = this.adminRepository.findById(account.getId());
         if (admin.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
+        if (account.getPassword() == null)
+            account.setPassword(admin.get().getPassword());
         return this.adminRepository.save(account);
     }
 

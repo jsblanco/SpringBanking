@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jsblanco.springbanking.models.users.AccountHolder;
+import com.jsblanco.springbanking.models.users.Admin;
 import com.jsblanco.springbanking.models.util.Address;
 import com.jsblanco.springbanking.repositories.users.AccountHolderRepository;
+import com.jsblanco.springbanking.repositories.users.AdminRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -22,6 +27,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,6 +41,9 @@ class AccountHolderControllerTest {
     private WebApplicationContext webApplicationContext;
     @Autowired
     private AccountHolderRepository accountHolderRepository;
+    @Autowired
+    private AdminRepository adminRepository;
+
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -41,9 +51,16 @@ class AccountHolderControllerTest {
     void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        this.accountHolderRepository.save(new AccountHolder("accountHolder1", LocalDate.of(1990, 1, 1), new Address()));
-        this.accountHolderRepository.save(new AccountHolder("accountHolder2", LocalDate.of(1990, 1, 1), new Address()));
-        this.accountHolderRepository.save(new AccountHolder("accountHolder3", LocalDate.of(1990, 1, 1), new Address()));
+        this.accountHolderRepository.save(new AccountHolder("accountHolder1", "password1", LocalDate.of(1990, 1, 1), new Address("1","2","3","4")));
+        this.accountHolderRepository.save(new AccountHolder("accountHolder2", "password2", LocalDate.of(1990, 1, 1), new Address("1","2","3","4")));
+        this.accountHolderRepository.save(new AccountHolder("accountHolder3", "password3", LocalDate.of(1990, 1, 1), new Address("1","2","3","4")));
+
+        Admin admin = adminRepository.save(new Admin("Admin", "password"));
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(admin);
     }
 
     @AfterEach
@@ -81,7 +98,7 @@ class AccountHolderControllerTest {
 
     @Test
     void saveAccountHolder() throws Exception {
-        AccountHolder newAccountHolder = new AccountHolder("accountHolder4", LocalDate.of(1990, 1, 1), new Address());
+        AccountHolder newAccountHolder = new AccountHolder("accountHolder4", "Password4", LocalDate.of(1990, 1, 1), new Address());
         String payload = objectMapper.writeValueAsString(newAccountHolder);
         MvcResult mvcResult = mockMvc.perform(post("/holder/")
                         .content(payload)

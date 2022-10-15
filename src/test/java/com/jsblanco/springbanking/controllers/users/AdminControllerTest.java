@@ -37,9 +37,9 @@ class AdminControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        adminRepository.save(new Admin("admin1"));
-        adminRepository.save(new Admin("admin2"));
-        adminRepository.save(new Admin( "admin3"));
+        adminRepository.save(new Admin("admin1", "password1"));
+        adminRepository.save(new Admin("admin2", "password2"));
+        adminRepository.save(new Admin( "admin3", "password3"));
     }
 
     @AfterEach
@@ -77,7 +77,7 @@ class AdminControllerTest {
 
     @Test
     void saveAdmin() throws Exception {
-        Admin newAdmin = new Admin("admin4");
+        Admin newAdmin = new Admin("admin4", "password4");
         String payload = objectMapper.writeValueAsString(newAdmin);
         MvcResult mvcResult = mockMvc.perform(post("/admin/")
                         .content(payload)

@@ -35,13 +35,20 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.httpBasic();
         http.csrf().disable();
         http.authorizeRequests()
                 .mvcMatchers(HttpMethod.GET, "/").anonymous()
-                .mvcMatchers(HttpMethod.POST, "/").hasRole("ADMIN")
-                .mvcMatchers(HttpMethod.POST, "/").hasAnyRole("ADMIN", "ACCOUNTHOLDER")
+                .mvcMatchers(HttpMethod.POST, "/product/thirdparty").hasRole("THIRDPARTY")
+                .mvcMatchers(HttpMethod.GET, "/thirdparty/**", "/holder/**").hasRole("ADMIN")
+                .mvcMatchers(HttpMethod.POST, "/thirdparty/**", "/holder/**", "/product/balance/**").hasRole("ADMIN")
+                .mvcMatchers(HttpMethod.PUT, "/thirdparty/**", "/holder/**").hasRole("ADMIN")
+                .mvcMatchers(HttpMethod.DELETE, "/thirdparty/**", "/holder/**").hasRole("ADMIN")
+                .mvcMatchers(HttpMethod.GET, "/product/**", "/student/**", "/checking/**", "/card/**", "/savings/**").hasAnyRole("ADMIN", "ACCOUNTHOLDER")
+                .mvcMatchers(HttpMethod.POST, "/product/**", "/student/**", "/checking/**", "/card/**", "/savings/**").hasAnyRole("ADMIN", "ACCOUNTHOLDER")
+                .mvcMatchers(HttpMethod.PUT, "/product/**", "/student/**", "/checking/**", "/card/**", "/savings/**").hasAnyRole("ADMIN", "ACCOUNTHOLDER")
+                .mvcMatchers(HttpMethod.DELETE, "/product/**", "/student/**", "/checking/**", "/card/**", "/savings/**").hasAnyRole("ADMIN", "ACCOUNTHOLDER")
                 .anyRequest().permitAll();
 
         return http.build();

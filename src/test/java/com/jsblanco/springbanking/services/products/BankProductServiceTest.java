@@ -64,11 +64,11 @@ class BankProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        admin = adminRepository.save(new Admin());
-        holder1 = accountHolderRepository.save(new AccountHolder("Holder1", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
-        holder2 = accountHolderRepository.save(new AccountHolder("Holder2", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
-        thirdParty1 = thirdPartyRepository.save(new ThirdParty("Third party 1", "Secret key 1"));
-        thirdParty2 = thirdPartyRepository.save(new ThirdParty("Third party 2", "Secret key 2"));
+        admin = adminRepository.save(new Admin("Admin", "Password"));
+        holder1 = accountHolderRepository.save(new AccountHolder("Holder1", "Password1", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
+        holder2 = accountHolderRepository.save(new AccountHolder("Holder2", "Password2", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
+        thirdParty1 = thirdPartyRepository.save(new ThirdParty("Third party 1", "password1", "Secret key 1"));
+        thirdParty2 = thirdPartyRepository.save(new ThirdParty("Third party 2", "password2", "Secret key 2"));
 
         creditCard = creditCardRepository.save(new CreditCard(1, new BigDecimal(1000), holder1));
         savingsAccount = savingsAccountRepository.save(new SavingsAccount(2, new BigDecimal(1000), holder1, "secret savings", new Date(), Status.ACTIVE));
@@ -147,15 +147,13 @@ class BankProductServiceTest {
         Money balanceModification = new Money(new BigDecimal(10));
         Money updatedBalance = checkingAccount.getBalance();
         updatedBalance.increaseAmount(balanceModification);
-        this.bankProductService.modifyProductBalance(checkingAccount.getId(), balanceModification, admin);
+        this.bankProductService.modifyProductBalance(checkingAccount.getId(), balanceModification);
         assertEquals(updatedBalance, this.bankProductService.getProductBalance(checkingAccount.getId(), admin));
 
         balanceModification = new Money(new BigDecimal(-10));
         updatedBalance.decreaseAmount(balanceModification);
-        this.bankProductService.modifyProductBalance(checkingAccount.getId(), balanceModification, admin);
+        this.bankProductService.modifyProductBalance(checkingAccount.getId(), balanceModification);
         assertEquals(updatedBalance, this.bankProductService.getProductBalance(checkingAccount.getId(), admin));
-
-        assertThrows(ResponseStatusException.class, () -> this.bankProductService.modifyProductBalance(checkingAccount.getId(), new Money(new BigDecimal(1)), holder1), "Only admins should be able to modify balances this way");
     }
 
     @Test
