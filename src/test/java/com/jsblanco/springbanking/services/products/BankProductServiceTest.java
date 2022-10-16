@@ -1,5 +1,6 @@
 package com.jsblanco.springbanking.services.products;
 
+import com.jsblanco.springbanking.dao.CreateBankProductDao;
 import com.jsblanco.springbanking.models.products.*;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.users.Admin;
@@ -47,8 +48,17 @@ class BankProductServiceTest {
     CheckingAccountRepository checkingAccountRepository;
     @Autowired
     StudentCheckingAccountRepository studentCheckingAccountRepository;
+
     @Autowired
     BankProductService bankProductService;
+    @Autowired
+    CreditCardService creditCardService;
+    @Autowired
+    SavingsAccountService savingsAccountService;
+    @Autowired
+    CheckingAccountService checkingAccountService;
+    @Autowired
+    StudentCheckingAccountService studentCheckingAccountService;
 
     Admin admin;
     AccountHolder holder1;
@@ -96,21 +106,25 @@ class BankProductServiceTest {
 
     @Test
     void save() {
-        CreditCard newCard = (CreditCard) this.bankProductService.save(new CreditCard(99, new BigDecimal(1111), holder2));
-        assertEquals(newCard, this.bankProductService.get(newCard.getId()), "Should store new credit cards");
-        assertThrows(ResponseStatusException.class, () -> this.bankProductService.save(newCard), "Should not let save products if they're already in the db");
+        CreateBankProductDao<CreditCard> creditCardDao = new CreateBankProductDao<>(new CreditCard(99, new BigDecimal(1111),null), holder2.getId());
+        CreditCard newCreditCard = this.creditCardService.createNewProduct(creditCardDao);
+        assertEquals(newCreditCard, this.bankProductService.get(newCreditCard.getId()), "Should store new credit cards");
+        assertThrows(ResponseStatusException.class, () -> this.bankProductService.save(new CreateBankProductDao<>(newCreditCard, holder2.getId())), "Should not let save products if they're already in the db");
 
-        SavingsAccount newSavingsAccount = (SavingsAccount) this.bankProductService.save(new SavingsAccount(2222, new BigDecimal(1000), holder1, "secret", new Date(), Status.ACTIVE));
-        assertEquals(newSavingsAccount, this.bankProductService.get(newSavingsAccount.getId()), "Should store new saving accounts");
-        assertThrows(ResponseStatusException.class, () -> this.bankProductService.save(newSavingsAccount), "Should not let save products if they're already in the db");
+        CreateBankProductDao<SavingsAccount> savingsAccountDao = new CreateBankProductDao<>(new SavingsAccount(99, new BigDecimal(1111),null, "secret", new Date(), Status.ACTIVE), holder2.getId());
+        SavingsAccount newSavingsAccount = this.savingsAccountService.createNewProduct(savingsAccountDao);
+        assertEquals(newSavingsAccount, this.bankProductService.get(newSavingsAccount.getId()), "Should store new credit cards");
+        assertThrows(ResponseStatusException.class, () -> this.bankProductService.save(new CreateBankProductDao<>(newSavingsAccount, holder2.getId())), "Should not let save products if they're already in the db");
 
-        CheckingAccount newCheckingAccount = (CheckingAccount) this.bankProductService.save(new CheckingAccount(3333, new BigDecimal(1000), holder1, "secret", new Date(), Status.ACTIVE));
-        assertEquals(newCheckingAccount, this.bankProductService.get(newCheckingAccount.getId()), "Should store new checking accounts");
-        assertThrows(ResponseStatusException.class, () -> this.bankProductService.save(newCheckingAccount), "Should not let save products if they're already in the db");
+        CreateBankProductDao<CheckingAccount> checkingAccountDao = new CreateBankProductDao<>(new CheckingAccount(99, new BigDecimal(1111),null, "secret", new Date(), Status.ACTIVE), holder2.getId());
+        CheckingAccount newCheckingAccount = this.checkingAccountService.createNewProduct(checkingAccountDao);
+        assertEquals(newCheckingAccount, this.bankProductService.get(newCheckingAccount.getId()), "Should store new credit cards");
+        assertThrows(ResponseStatusException.class, () -> this.bankProductService.save(new CreateBankProductDao<>(newCheckingAccount, holder2.getId())), "Should not let save products if they're already in the db");
 
-        StudentCheckingAccount newStudentCheckingAccount = (StudentCheckingAccount) this.bankProductService.save(new StudentCheckingAccount(new CheckingAccount(4444, new BigDecimal(1000), holder2, "secret", new Date(), Status.ACTIVE)));
-        assertEquals(newStudentCheckingAccount, this.bankProductService.get(newStudentCheckingAccount.getId()), "Should store new student checking accounts");
-        assertThrows(ResponseStatusException.class, () -> this.bankProductService.save(newStudentCheckingAccount), "Should not let save products if they're already in the db");
+        CreateBankProductDao<StudentCheckingAccount> studentCheckingAccountDao = new CreateBankProductDao<>(new StudentCheckingAccount(new CheckingAccount(99, new BigDecimal(1111),null, "secret", new Date(), Status.ACTIVE)), holder2.getId());
+        StudentCheckingAccount newStudentCheckingAccount = this.studentCheckingAccountService.createNewProduct(studentCheckingAccountDao);
+        assertEquals(newStudentCheckingAccount, this.bankProductService.get(newStudentCheckingAccount.getId()), "Should store new credit cards");
+        assertThrows(ResponseStatusException.class, () -> this.bankProductService.save(new CreateBankProductDao<>(newStudentCheckingAccount, holder2.getId())), "Should not let save products if they're already in the db");
     }
 
     @Test

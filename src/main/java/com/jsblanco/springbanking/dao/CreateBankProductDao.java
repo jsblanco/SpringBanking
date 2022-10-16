@@ -7,8 +7,8 @@ import com.jsblanco.springbanking.models.products.*;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-public class CreateBankProductDao<T> {
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+public class CreateBankProductDao<T extends BankProduct> {
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
     @JsonSubTypes({
             @JsonSubTypes.Type(value= CreditCard.class , name="creditCard"),
             @JsonSubTypes.Type(value= SavingsAccount.class, name="savingsAccount"),

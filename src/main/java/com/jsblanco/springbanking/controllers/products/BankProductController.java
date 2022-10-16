@@ -1,5 +1,6 @@
 package com.jsblanco.springbanking.controllers.products;
 
+import com.jsblanco.springbanking.dao.CreateBankProductDao;
 import com.jsblanco.springbanking.dao.ThirdPartyTransferDao;
 import com.jsblanco.springbanking.dao.TransferFundsDao;
 import com.jsblanco.springbanking.models.products.Account;
@@ -41,6 +42,12 @@ public class BankProductController {
     public Money getBankProductBalance(@PathVariable Integer id) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return this.bankProductService.getProductBalance(id, user);
+    }
+
+    @PostMapping("/product/")
+    @ResponseStatus(HttpStatus.CREATED)
+    public BankProduct saveBankProducts(@RequestBody CreateBankProductDao<BankProduct> dao) {
+        return this.bankProductService.save(dao);
     }
 
     @PostMapping("/product/balance/{id}")

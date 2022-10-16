@@ -22,7 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.util.*;
 
-import static com.jsblanco.springbanking.models.util.Status.ACTIVE;
 import static com.jsblanco.springbanking.util.DateUtils.*;
 
 @Service
@@ -73,21 +72,13 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account createCheckingAccount(CreateBankProductDao<CheckingAccount> dao) {
-        CheckingAccount checkingAccount = dao.getProduct();
-        checkingAccount.setStatus(ACTIVE);
-        checkingAccount.setCreationDate(today());
-        checkingAccount.setLastMaintenanceDate(today());
-        checkingAccount.setPrimaryOwner(this.accountHolderService.getById(dao.getPrimaryOwnerId()));
-        try {
-             if (dao.getSecondaryOwnerId() != null)
-                checkingAccount.setSecondaryOwner(this.accountHolderService.getById(dao.getSecondaryOwnerId()));
-        } catch (ResponseStatusException ignored) {}
-
-        if (getPeriodBetweenDates(getDateFromLocalDate(checkingAccount.getPrimaryOwner().getBirthDay()), today()).getYears() < 25){
-            return this.studentCheckingAccountService.save(new StudentCheckingAccount(checkingAccount));
+        AccountHolder primaryOwner = this.accountHolderService.getById(dao.getPrimaryOwnerId());
+        if (getPeriodBetweenDates(getDateFromLocalDate(primaryOwner.getBirthDay()), today()).getYears() < 25){
+            CreateBankProductDao<StudentCheckingAccount> studentDao = new CreateBankProductDao<>(new StudentCheckingAccount(dao.getProduct()), dao.getPrimaryOwnerId(), dao.getSecondaryOwnerId());
+            return this.studentCheckingAccountService.createNewProduct(studentDao);
         }
 
-        return this.checkingAccountService.save(checkingAccount);
+        return this.checkingAccountService.createNewProduct(dao);
     }
 
     @Override

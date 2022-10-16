@@ -1,5 +1,6 @@
 package com.jsblanco.springbanking.services.products;
 
+import com.jsblanco.springbanking.dao.CreateBankProductDao;
 import com.jsblanco.springbanking.models.products.*;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.users.Admin;
@@ -26,6 +27,8 @@ public class BankProductServiceImpl implements BankProductService {
     CheckingAccountService checkingAccountService;
     @Autowired
     StudentCheckingAccountService studentCheckingAccountService;
+    @Autowired
+    AccountService accountService;
 
     @Override
     public BankProduct get(Integer id) {
@@ -36,7 +39,7 @@ public class BankProductServiceImpl implements BankProductService {
                 savingsAccountService,
                 studentCheckingAccountService}) {
             try {
-                BankProduct product = (BankProduct) repo.getById(id);
+                BankProduct product = repo.getById(id);
                 if (product != null) return product;
             } catch (Exception ignored) {
             }
@@ -46,11 +49,13 @@ public class BankProductServiceImpl implements BankProductService {
     }
 
     @Override
-    public BankProduct save(BankProduct bankProduct) {
+    public BankProduct save(CreateBankProductDao dao) {
         try {
-            get(bankProduct.getId());
-        } catch (ResponseStatusException e) {
-            return (BankProduct) fetchProductRepository(bankProduct).save(bankProduct);
+            get(dao.getProduct().getId());
+        } catch (Exception e) {
+            if (dao.getProduct() instanceof CheckingAccount)
+                return accountService.createCheckingAccount(dao);
+            return fetchProductService(dao.getProduct()).createNewProduct(dao);
         }
         throw new ResponseStatusException(HttpStatus.CONFLICT, "There is already a product with this ID inside the database");
     }
@@ -62,7 +67,7 @@ public class BankProductServiceImpl implements BankProductService {
         } catch (ResponseStatusException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such product exists in the database");
         }
-        return (BankProduct) fetchProductRepository(bankProduct).save(bankProduct);
+        return (BankProduct) fetchProductService(bankProduct).save(bankProduct);
     }
 
     @Override
@@ -70,7 +75,7 @@ public class BankProductServiceImpl implements BankProductService {
         BankProduct productInDb = get(id);
         if (productInDb == null)
             throw new IllegalArgumentException("No such account in the db");
-        fetchProductRepository(productInDb).delete(id);
+        fetchProductService(productInDb).delete(id);
     }
 
     @Override
@@ -115,7 +120,7 @@ public class BankProductServiceImpl implements BankProductService {
         return accounts.stream().toList();
     }
 
-    private BankProductSubclassService fetchProductRepository(BankProduct bankProduct) {
+    private BankProductSubclassService fetchProductService(BankProduct bankProduct) {
         if (CreditCard.class.equals(bankProduct.getClass())) {
             return this.creditCardService;
         }
