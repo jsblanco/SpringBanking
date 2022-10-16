@@ -34,14 +34,7 @@ public class SavingsAccountServiceImpl implements SavingsAccountService {
 
     @Override
     public SavingsAccount createNewProduct(CreateBankProductDao<SavingsAccount> dao) {
-        SavingsAccount savingsAccount = dao.getProduct();
-        savingsAccount.setPrimaryOwner(this.accountHolderService.getById(dao.getPrimaryOwnerId()));
-        try {
-            if (dao.getSecondaryOwnerId() != null)
-                savingsAccount.setSecondaryOwner(this.accountHolderService.getById(dao.getSecondaryOwnerId()));
-        } catch (ResponseStatusException ignored) {}
-
-        return this.save(savingsAccount);
+        return this.save(this.populateBankProduct(dao, this.accountHolderService));
     }
 
     @Override

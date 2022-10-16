@@ -120,7 +120,6 @@ class CheckingAccountControllerTest {
     @Test
     void saveCheckingAccounts() throws Exception {
         CheckingAccount newCheckingAccount = new CheckingAccount(222, new BigDecimal(10000), null, "secretKey1", new Date(), Status.ACTIVE);
-
         MvcResult mvcResult = mockMvc.perform(post("/checking/")
                         .content(objectMapper.writeValueAsString(new CreateBankProductDao<>(newCheckingAccount, oldHolder.getId(), studentHolder.getId())))
                         .contentType(MediaType.APPLICATION_JSON)

@@ -33,14 +33,7 @@ public class StudentCheckingAccountServiceImpl implements StudentCheckingAccount
 
     @Override
     public StudentCheckingAccount createNewProduct(CreateBankProductDao<StudentCheckingAccount> dao) {
-        StudentCheckingAccount studentCheckingAccount = dao.getProduct();
-        studentCheckingAccount.setPrimaryOwner(this.accountHolderService.getById(dao.getPrimaryOwnerId()));
-        try {
-            if (dao.getSecondaryOwnerId() != null)
-                studentCheckingAccount.setSecondaryOwner(this.accountHolderService.getById(dao.getSecondaryOwnerId()));
-        } catch (ResponseStatusException ignored) {}
-
-        return this.save(studentCheckingAccount);
+        return this.save(this.populateBankProduct(dao, this.accountHolderService));
     }
 
     @Override

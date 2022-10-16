@@ -33,14 +33,7 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     @Override
     public CreditCard createNewProduct(CreateBankProductDao<CreditCard> dao) {
-        CreditCard creditCard = dao.getProduct();
-        creditCard.setPrimaryOwner(this.accountHolderService.getById(dao.getPrimaryOwnerId()));
-        try {
-            if (dao.getSecondaryOwnerId() != null)
-                creditCard.setSecondaryOwner(this.accountHolderService.getById(dao.getSecondaryOwnerId()));
-        } catch (ResponseStatusException ignored) {}
-
-        return this.save(creditCard);
+        return this.save(this.populateBankProduct(dao, this.accountHolderService));
     }
 
     @Override

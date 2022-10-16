@@ -56,14 +56,7 @@ public class CheckingAccountServiceImpl implements CheckingAccountService {
 
     @Override
     public CheckingAccount createNewProduct(CreateBankProductDao<CheckingAccount> dao) {
-        CheckingAccount checkingAccount = dao.getProduct();
-        checkingAccount.setPrimaryOwner(this.accountHolderService.getById(dao.getPrimaryOwnerId()));
-        try {
-            if (dao.getSecondaryOwnerId() != null)
-                checkingAccount.setSecondaryOwner(this.accountHolderService.getById(dao.getSecondaryOwnerId()));
-        } catch (ResponseStatusException ignored) {}
-
-        return this.save(checkingAccount);
+        return this.save(this.populateBankProduct(dao, this.accountHolderService));
     }
 
     @Override
