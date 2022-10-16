@@ -1,7 +1,7 @@
 package com.jsblanco.springbanking.services.products.interfaces.util;
 
 import com.jsblanco.springbanking.dao.CreateBankProductDao;
-import com.jsblanco.springbanking.models.interfaces.HasMaintenanceFee;
+import com.jsblanco.springbanking.models.interfaces.HasPeriodicChanges;
 import com.jsblanco.springbanking.models.products.Account;
 import com.jsblanco.springbanking.models.products.BankProduct;
 import com.jsblanco.springbanking.models.users.AccountHolder;
@@ -26,8 +26,8 @@ public interface BankProductSubclassService<T extends BankProduct> extends CrudS
             ((Account) checkingAccount).setStatus(ACTIVE);
             ((Account) checkingAccount).setCreationDate(today());
         }
-        if (checkingAccount instanceof HasMaintenanceFee) {
-            ((HasMaintenanceFee) checkingAccount).setLastMaintenanceDate(today());
+        if (checkingAccount instanceof HasPeriodicChanges) {
+            ((HasPeriodicChanges) checkingAccount).setLastMaintenanceDate(today());
         }
         checkingAccount.setPrimaryOwner(accountHolderService.getById(dao.getPrimaryOwnerId()));
         try {
