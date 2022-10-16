@@ -23,18 +23,15 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     AccountHolderService accountHolderService;
 
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = getByName(username);
-
         CustomUserDetails userDetails = new CustomUserDetails();
-        userDetails.setUser(user);
+        userDetails.setUser(getByUsername(username));
 
         return userDetails;
     }
 
-    public User getByName(String username) {
+    public User getByUsername(String username) {
         for (UserSubclassService<?> serviceInterface : new UserSubclassService[]{
                 adminService,
                 thirdPartyService,

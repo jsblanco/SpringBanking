@@ -1,5 +1,6 @@
 package com.jsblanco.springbanking.controllers.products;
 
+import com.jsblanco.springbanking.dao.CreateBankProductDao;
 import com.jsblanco.springbanking.models.products.StudentCheckingAccount;
 import com.jsblanco.springbanking.services.products.interfaces.StudentCheckingAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,8 @@ public class StudentCheckingAccountController {
 
     @PostMapping("/student/")
     @ResponseStatus(HttpStatus.CREATED)
-    public StudentCheckingAccount saveStudentCheckingAccounts(@RequestBody @Valid StudentCheckingAccount account) {
-        return this.studentCheckingAccountService.save(account);
+    public StudentCheckingAccount saveStudentCheckingAccounts(@RequestBody @Valid CreateBankProductDao<StudentCheckingAccount> account) {
+        return this.studentCheckingAccountService.createNewProduct(account);
     }
 
     @PutMapping("/student/")

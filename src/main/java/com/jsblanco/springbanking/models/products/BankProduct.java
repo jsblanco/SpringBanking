@@ -1,7 +1,6 @@
 package com.jsblanco.springbanking.models.products;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.jsblanco.springbanking.models.interfaces.HasBalance;
 import com.jsblanco.springbanking.models.users.AccountHolder;
@@ -21,12 +20,12 @@ import java.util.Objects;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-@JsonSubTypes({
-        @JsonSubTypes.Type(value= CreditCard.class , name="creditcard"),
-        @JsonSubTypes.Type(value= SavingsAccount.class, name="savingsaccount"),
-        @JsonSubTypes.Type(value= CheckingAccount.class, name="checkingaccount"),
-        @JsonSubTypes.Type(value= StudentCheckingAccount.class, name="studentcheckingaccount")
-})
+//@JsonSubTypes({
+//        @JsonSubTypes.Type(value= CreditCard.class , name="creditCard"),
+//        @JsonSubTypes.Type(value= SavingsAccount.class, name="savingsAccount"),
+//        @JsonSubTypes.Type(value= CheckingAccount.class, name="checkingAccount"),
+//        @JsonSubTypes.Type(value= StudentCheckingAccount.class, name="studentCheckingAccount")
+//})
 @DiscriminatorColumn(name = "product_type")
 public abstract class BankProduct implements HasBalance {
     @Id

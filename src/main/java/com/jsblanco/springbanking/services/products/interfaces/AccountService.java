@@ -1,5 +1,6 @@
 package com.jsblanco.springbanking.services.products.interfaces;
 
+import com.jsblanco.springbanking.dao.CreateBankProductDao;
 import com.jsblanco.springbanking.dao.ThirdPartyTransferDao;
 import com.jsblanco.springbanking.dao.TransferFundsDao;
 import com.jsblanco.springbanking.models.products.Account;
@@ -14,7 +15,7 @@ public interface AccountService {
     Account save(Account bankProduct);
     Account update(Account bankProduct);
 
-    Account createCheckingAccount(CheckingAccount account);
+    Account createCheckingAccount(CreateBankProductDao<CheckingAccount> dao);
     List<Account> getAll();
     List<Account> getByOwner(AccountHolder owner);
 

@@ -4,7 +4,9 @@ import com.jsblanco.springbanking.models.users.ThirdParty;
 import com.jsblanco.springbanking.repositories.users.ThirdPartyRepository;
 import com.jsblanco.springbanking.services.users.interfaces.ThirdPartyService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -14,6 +16,8 @@ import java.util.Optional;
 @Service
 public class ThirdPartyServiceImpl implements ThirdPartyService {
 
+    @Autowired @Lazy
+    PasswordEncoder passwordEncoder;
     @Autowired
     ThirdPartyRepository thirdPartyRepository;
 
@@ -27,6 +31,7 @@ public class ThirdPartyServiceImpl implements ThirdPartyService {
 
     @Override
     public ThirdParty save(ThirdParty account) {
+        account.setPassword(passwordEncoder.encode(account.getPassword()));
         return this.thirdPartyRepository.save(account);
     }
 

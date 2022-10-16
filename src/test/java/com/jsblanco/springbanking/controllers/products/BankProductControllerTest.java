@@ -159,7 +159,7 @@ class BankProductControllerTest {
 
     @Test
     void getBankProductBalance() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(get("/product/" + savingsAccount.getId() + "/balance"))
+        MvcResult mvcResult = mockMvc.perform(get("/product/balance/" + savingsAccount.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
@@ -168,7 +168,7 @@ class BankProductControllerTest {
         assertEquals(fetchedSavingsAccountBalance, savingsAccount.getBalance());
 
         when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(admin);
-        mvcResult = mockMvc.perform(get("/product/" + savingsAccount.getId() + "/balance"))
+        mvcResult = mockMvc.perform(get("/product/balance/"+ savingsAccount.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
@@ -177,7 +177,7 @@ class BankProductControllerTest {
         assertEquals(fetchedSavingsAccountBalance, savingsAccount.getBalance());
 
         when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(holder2);
-        mockMvc.perform(get("/product/" + savingsAccount.getId() + "/balance"))
+        mockMvc.perform(get("/product/balance/" + savingsAccount.getId()))
                 .andExpect(status().isForbidden());
     }
 

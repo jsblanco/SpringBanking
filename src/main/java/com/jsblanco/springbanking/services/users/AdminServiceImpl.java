@@ -4,7 +4,9 @@ import com.jsblanco.springbanking.models.users.Admin;
 import com.jsblanco.springbanking.repositories.users.AdminRepository;
 import com.jsblanco.springbanking.services.users.interfaces.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -14,6 +16,8 @@ import java.util.Optional;
 @Service
 public class AdminServiceImpl implements AdminService {
 
+    @Autowired @Lazy
+    PasswordEncoder passwordEncoder;
     @Autowired
     AdminRepository adminRepository;
 
@@ -27,6 +31,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public Admin save(Admin account) {
+        account.setPassword(passwordEncoder.encode(account.getPassword()));
         return this.adminRepository.save(account);
     }
 

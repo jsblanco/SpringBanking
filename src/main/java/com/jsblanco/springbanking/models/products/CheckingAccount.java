@@ -1,10 +1,11 @@
 package com.jsblanco.springbanking.models.products;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.jsblanco.springbanking.models.interfaces.HasMaintenanceFee;
 import com.jsblanco.springbanking.models.interfaces.HasMinimumBalance;
 import com.jsblanco.springbanking.models.users.AccountHolder;
-import com.jsblanco.springbanking.models.util.DateUtils;
+import com.jsblanco.springbanking.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Money;
 import com.jsblanco.springbanking.models.util.Status;
 import javax.validation.constraints.NotNull;
@@ -16,8 +17,10 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 @DiscriminatorValue("checking_account")
 public class CheckingAccount extends Account implements HasMinimumBalance, HasMaintenanceFee {
+
 
     @NotNull
     private Date lastMaintenanceDate;

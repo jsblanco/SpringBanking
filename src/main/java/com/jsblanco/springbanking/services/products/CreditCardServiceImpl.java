@@ -1,9 +1,11 @@
 package com.jsblanco.springbanking.services.products;
 
+import com.jsblanco.springbanking.dao.CreateBankProductDao;
 import com.jsblanco.springbanking.models.products.CreditCard;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.repositories.products.CreditCardRepository;
 import com.jsblanco.springbanking.services.products.interfaces.CreditCardService;
+import com.jsblanco.springbanking.services.users.interfaces.AccountHolderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,8 @@ import java.util.Set;
 public class CreditCardServiceImpl implements CreditCardService {
     @Autowired
     CreditCardRepository creditCardRepository;
+    @Autowired
+    AccountHolderService accountHolderService;
 
     @Override
     public CreditCard getById(Integer id) {
@@ -25,6 +29,18 @@ public class CreditCardServiceImpl implements CreditCardService {
         if (creditCard.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
         return creditCard.get();
+    }
+
+    @Override
+    public CreditCard createNewProduct(CreateBankProductDao<CreditCard> dao) {
+        CreditCard creditCard = dao.getProduct();
+        creditCard.setPrimaryOwner(this.accountHolderService.getById(dao.getPrimaryOwnerId()));
+        try {
+            if (dao.getSecondaryOwnerId() != null)
+                creditCard.setSecondaryOwner(this.accountHolderService.getById(dao.getSecondaryOwnerId()));
+        } catch (ResponseStatusException ignored) {}
+
+        return this.save(creditCard);
     }
 
     @Override

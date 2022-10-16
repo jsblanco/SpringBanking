@@ -1,7 +1,7 @@
 package com.jsblanco.springbanking.models.products;
 
 import com.jsblanco.springbanking.models.users.AccountHolder;
-import com.jsblanco.springbanking.models.util.DateUtils;
+import com.jsblanco.springbanking.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Status;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;

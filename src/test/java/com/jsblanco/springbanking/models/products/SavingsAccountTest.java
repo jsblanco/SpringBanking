@@ -1,6 +1,6 @@
 package com.jsblanco.springbanking.models.products;
 
-import com.jsblanco.springbanking.models.util.DateUtils;
+import com.jsblanco.springbanking.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Money;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

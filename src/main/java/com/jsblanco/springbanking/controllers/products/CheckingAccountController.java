@@ -1,5 +1,6 @@
 package com.jsblanco.springbanking.controllers.products;
 
+import com.jsblanco.springbanking.dao.CreateBankProductDao;
 import com.jsblanco.springbanking.models.products.Account;
 import com.jsblanco.springbanking.models.products.CheckingAccount;
 import com.jsblanco.springbanking.services.products.interfaces.AccountService;
@@ -16,7 +17,6 @@ public class CheckingAccountController {
 
     @Autowired
     CheckingAccountService checkingAccountService;
-
     @Autowired
     AccountService accountService;
 
@@ -34,7 +34,7 @@ public class CheckingAccountController {
 
     @PostMapping("/checking/")
     @ResponseStatus(HttpStatus.CREATED)
-    public Account saveCheckingAccounts(@RequestBody @Valid CheckingAccount account) {
+    public Account saveCheckingAccounts(@RequestBody CreateBankProductDao<CheckingAccount> account) {
         return this.accountService.createCheckingAccount(account);
     }
 

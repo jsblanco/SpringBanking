@@ -1,15 +1,13 @@
 package com.jsblanco.springbanking.models.users;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-@MappedSuperclass
+import static javax.persistence.InheritanceType.JOINED;
+
+@Entity
+@Inheritance(strategy = JOINED)
+@DiscriminatorColumn(name="user_type")
 public abstract class User {
     @Id
     @GeneratedValue
@@ -19,7 +17,7 @@ public abstract class User {
     @NotNull
     @Column(unique = true)
     private String username;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+//    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     public User() {
@@ -47,7 +45,6 @@ public abstract class User {
         this.name = name;
     }
 
-    @JsonIgnore
     public String getPassword() {
         return password;
     }

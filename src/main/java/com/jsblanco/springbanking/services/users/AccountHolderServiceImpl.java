@@ -4,7 +4,9 @@ import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.repositories.users.AccountHolderRepository;
 import com.jsblanco.springbanking.services.users.interfaces.AccountHolderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -14,6 +16,8 @@ import java.util.Optional;
 @Service
 public class AccountHolderServiceImpl implements AccountHolderService {
 
+    @Autowired @Lazy
+    PasswordEncoder passwordEncoder;
     @Autowired
     AccountHolderRepository accountHolderRepository;
 
@@ -27,6 +31,7 @@ public class AccountHolderServiceImpl implements AccountHolderService {
 
     @Override
     public AccountHolder save(AccountHolder account) {
+        account.setPassword(passwordEncoder.encode(account.getPassword()));
         return this.accountHolderRepository.save(account);
     }
 

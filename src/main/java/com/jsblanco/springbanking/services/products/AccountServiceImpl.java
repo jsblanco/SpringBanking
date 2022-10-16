@@ -1,5 +1,6 @@
 package com.jsblanco.springbanking.services.products;
 
+import com.jsblanco.springbanking.dao.CreateBankProductDao;
 import com.jsblanco.springbanking.dao.ThirdPartyTransferDao;
 import com.jsblanco.springbanking.dao.TransferFundsDao;
 import com.jsblanco.springbanking.models.products.*;
@@ -12,15 +13,16 @@ import com.jsblanco.springbanking.services.products.interfaces.CheckingAccountSe
 import com.jsblanco.springbanking.services.products.interfaces.SavingsAccountService;
 import com.jsblanco.springbanking.services.products.interfaces.StudentCheckingAccountService;
 import com.jsblanco.springbanking.services.products.interfaces.util.BankProductSubclassService;
+import com.jsblanco.springbanking.services.users.interfaces.AccountHolderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.*;
+
+import static com.jsblanco.springbanking.util.DateUtils.*;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -31,6 +33,8 @@ public class AccountServiceImpl implements AccountService {
     CheckingAccountService checkingAccountService;
     @Autowired
     StudentCheckingAccountService studentCheckingAccountService;
+    @Autowired
+    AccountHolderService accountHolderService;
 
     public Account get(Integer id) {
 
@@ -67,11 +71,19 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account createCheckingAccount(CheckingAccount account) {
-        LocalDate birthday = account.getPrimaryOwner().getBirthDay();
-        if (Period.between(birthday, LocalDate.now()).getYears() < 24)
-            return this.studentCheckingAccountService.save(new StudentCheckingAccount(account));
-        return this.checkingAccountService.save(account);
+    public Account createCheckingAccount(CreateBankProductDao<CheckingAccount> dao) {
+        CheckingAccount checkingAccount = dao.getProduct();
+        checkingAccount.setPrimaryOwner(this.accountHolderService.getById(dao.getPrimaryOwnerId()));
+        try {
+             if (dao.getSecondaryOwnerId() != null)
+                checkingAccount.setSecondaryOwner(this.accountHolderService.getById(dao.getSecondaryOwnerId()));
+        } catch (ResponseStatusException ignored) {}
+
+        if (getPeriodBetweenDates(getDateFromLocalDate(checkingAccount.getPrimaryOwner().getBirthDay()), today()).getYears() < 25){
+            return this.studentCheckingAccountService.save(new StudentCheckingAccount(checkingAccount));
+        }
+
+        return this.checkingAccountService.save(checkingAccount);
     }
 
     @Override

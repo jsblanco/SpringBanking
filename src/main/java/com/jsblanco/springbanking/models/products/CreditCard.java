@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.jsblanco.springbanking.models.interfaces.HasInterestRate;
 import com.jsblanco.springbanking.models.users.AccountHolder;
-import com.jsblanco.springbanking.models.util.DateUtils;
+import com.jsblanco.springbanking.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Money;
 
 import javax.validation.constraints.NotNull;

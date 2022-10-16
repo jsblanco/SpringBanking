@@ -1,4 +1,4 @@
-package com.jsblanco.springbanking.models.util;
+package com.jsblanco.springbanking.util;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -8,7 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-public abstract class DateUtils {
+public class DateUtils {
 
     public static Period getPeriodBetweenDates(Date date1, Date date2) {
         return Period.between(getDateLocalValue(date1), getDateLocalValue(date2));
@@ -18,6 +18,10 @@ public abstract class DateUtils {
         return date.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
+    }
+
+    public static Date getDateFromLocalDate(LocalDate localDate) {
+        return Date.from(localDate.atStartOfDay().toInstant(ZoneOffset.UTC));
     }
 
     public static Date today(){

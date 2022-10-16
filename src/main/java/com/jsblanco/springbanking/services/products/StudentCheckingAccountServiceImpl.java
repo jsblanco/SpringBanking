@@ -1,9 +1,11 @@
 package com.jsblanco.springbanking.services.products;
 
+import com.jsblanco.springbanking.dao.CreateBankProductDao;
 import com.jsblanco.springbanking.models.products.StudentCheckingAccount;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.repositories.products.StudentCheckingAccountRepository;
 import com.jsblanco.springbanking.services.products.interfaces.StudentCheckingAccountService;
+import com.jsblanco.springbanking.services.users.interfaces.AccountHolderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,8 @@ import java.util.Set;
 public class StudentCheckingAccountServiceImpl implements StudentCheckingAccountService {
     @Autowired
     StudentCheckingAccountRepository studentCheckingAccountRepository;
+    @Autowired
+    AccountHolderService accountHolderService;
 
     @Override
     public StudentCheckingAccount getById(Integer id) {
@@ -25,6 +29,18 @@ public class StudentCheckingAccountServiceImpl implements StudentCheckingAccount
         if (studentCheckingAccount.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
         return studentCheckingAccount.get();
+    }
+
+    @Override
+    public StudentCheckingAccount createNewProduct(CreateBankProductDao<StudentCheckingAccount> dao) {
+        StudentCheckingAccount studentCheckingAccount = dao.getProduct();
+        studentCheckingAccount.setPrimaryOwner(this.accountHolderService.getById(dao.getPrimaryOwnerId()));
+        try {
+            if (dao.getSecondaryOwnerId() != null)
+                studentCheckingAccount.setSecondaryOwner(this.accountHolderService.getById(dao.getSecondaryOwnerId()));
+        } catch (ResponseStatusException ignored) {}
+
+        return this.save(studentCheckingAccount);
     }
 
     @Override

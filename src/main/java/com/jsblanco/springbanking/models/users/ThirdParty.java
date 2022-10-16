@@ -1,9 +1,11 @@
 package com.jsblanco.springbanking.models.users;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 
 @Entity
+@DiscriminatorValue("third_party")
 public class ThirdParty extends User {
     @NotNull
     private String hashedKey;

@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Entity
+@DiscriminatorValue("account_holder")
 public class AccountHolder extends User {
     @NotNull
     private LocalDate birthDay;
