@@ -32,6 +32,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import static java.util.UUID.randomUUID;
@@ -73,8 +74,8 @@ class CreditCardControllerTest {
         holder1 = accountHolderRepository.save(new AccountHolder("oldHolder", randomUUID().toString(), "Password1", LocalDate.of(1970, 1, 1), new Address("door", "postalCode", "city", "country")));
         holder2 = accountHolderRepository.save(new AccountHolder("studentHolder", randomUUID().toString(), "Password2", LocalDate.of(2010, 1, 1), new Address("door", "postalCode", "city", "country")));
 
-        creditCard1 = creditCardRepository.save(new CreditCard(123, new BigDecimal(1000), holder1));
-        creditCard2 = creditCardRepository.save(new CreditCard(456, new BigDecimal(1000), holder1));
+        creditCard1 = creditCardRepository.save(new CreditCard(123, new BigDecimal(1000), new Date(), holder1));
+        creditCard2 = creditCardRepository.save(new CreditCard(456, new BigDecimal(1000), new Date(), holder1));
 
         Authentication authentication = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
@@ -118,7 +119,7 @@ class CreditCardControllerTest {
 
     @Test
     void saveCreditCards() throws Exception {
-        CreditCard newCreditCard = new CreditCard(222, new BigDecimal(10000), null);
+        CreditCard newCreditCard = new CreditCard(222, new BigDecimal(10000), new Date(), null);
 
         MvcResult mvcResult = mockMvc.perform(post("/card/")
                         .content(objectMapper.writeValueAsString(new CreateBankProductDao<>(newCreditCard, holder1.getId(), holder2.getId())))

@@ -42,13 +42,14 @@ public class SecurityConfiguration {
         http.authorizeRequests()
                 .mvcMatchers(HttpMethod.GET, "/").anonymous()
                 .mvcMatchers(HttpMethod.POST, "/product/thirdparty").hasRole("THIRDPARTY")
-                .mvcMatchers(HttpMethod.GET, "/thirdparty/**", "/holder/**").hasRole("ADMIN")
+                .mvcMatchers(HttpMethod.GET, "/thirdparty/**", "/holder/**", "/product/all").hasRole("ADMIN")
                 .mvcMatchers(HttpMethod.POST, "/thirdparty/", "/holder/", "/product/balance/**").hasRole("ADMIN")
                 .mvcMatchers(HttpMethod.PUT, "/thirdparty/", "/holder/").hasRole("ADMIN")
                 .mvcMatchers(HttpMethod.DELETE, "/thirdparty/**", "/holder/**").hasRole("ADMIN")
-                .mvcMatchers(HttpMethod.GET, "/product/**", "/student/**", "/checking/**", "/card/**", "/savings/**").hasAnyRole("ADMIN", "ACCOUNTHOLDER")
-                .mvcMatchers(HttpMethod.POST, "/product/**", "/student/**", "/checking/**", "/card/**", "/savings/**").hasAnyRole("ADMIN", "ACCOUNTHOLDER")
-                .mvcMatchers(HttpMethod.PUT, "/product/**", "/student/**", "/checking/**", "/card/**", "/savings/**").hasAnyRole("ADMIN", "ACCOUNTHOLDER")
+                .mvcMatchers(HttpMethod.GET, "/product/").hasAnyRole("ACCOUNTHOLDER")
+                .mvcMatchers(HttpMethod.GET, "/product/", "/student/", "/checking/", "/card/", "/savings/").hasAnyRole("ADMIN", "ACCOUNTHOLDER")
+                .mvcMatchers(HttpMethod.POST, "/product/", "/student/", "/checking/", "/card/", "/savings/").hasAnyRole("ADMIN", "ACCOUNTHOLDER")
+                .mvcMatchers(HttpMethod.PUT, "/product/", "/student/", "/checking/", "/card/", "/savings/").hasAnyRole("ADMIN", "ACCOUNTHOLDER")
                 .mvcMatchers(HttpMethod.DELETE, "/product/**", "/student/**", "/checking/**", "/card/**", "/savings/**").hasAnyRole("ADMIN", "ACCOUNTHOLDER")
                 .anyRequest().permitAll();
 

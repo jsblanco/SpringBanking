@@ -62,4 +62,9 @@ public class ThirdPartyServiceImpl implements ThirdPartyService {
     public ThirdParty getByUsername(String name) {
         return this.thirdPartyRepository.getThirdPartyByUsername(name);
     }
+
+    @Override
+    public ThirdParty getByHashedKey(String hashedKey) {
+        return this.thirdPartyRepository.getThirdPartyByHashedKey(hashedKey);
+    }
 }

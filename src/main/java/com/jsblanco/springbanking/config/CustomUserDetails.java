@@ -27,7 +27,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getName();
+        return user.getUsername();
     }
 
     @Override
@@ -52,5 +52,9 @@ public class CustomUserDetails implements UserDetails {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public User getUser() {
+        return this.user;
     }
 }

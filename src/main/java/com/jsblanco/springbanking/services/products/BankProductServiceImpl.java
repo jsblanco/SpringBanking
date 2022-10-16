@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 @Service
@@ -79,6 +78,14 @@ public class BankProductServiceImpl implements BankProductService {
     }
 
     @Override
+    public BankProduct getProductData(Integer id, User user) {
+        BankProduct product = this.get(id);
+        if (user instanceof Admin || product.isOwnedBy((AccountHolder) user))
+            return product;
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account data can only be consulted by its owners.");
+    }
+
+    @Override
     public Money getProductBalance(Integer id, User user) {
         BankProduct product = get(id);
         if (user instanceof Admin || (user instanceof AccountHolder && product.isOwnedBy((AccountHolder) user))) {
@@ -90,9 +97,10 @@ public class BankProductServiceImpl implements BankProductService {
     @Override
     public Money modifyProductBalance(Integer id, Money balanceChange) {
         BankProduct product = get(id);
-        if (balanceChange.getAmount().compareTo(BigDecimal.ZERO) > 0)
+        if (balanceChange.getAmount().signum() > 0)
             product.increaseBalance(balanceChange);
-        else product.decreaseBalance(balanceChange);
+        else
+            product.decreaseBalance(balanceChange);
         return update(product).getBalance();
     }
 

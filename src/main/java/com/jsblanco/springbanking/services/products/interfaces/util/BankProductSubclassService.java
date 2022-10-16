@@ -21,22 +21,22 @@ public interface BankProductSubclassService<T extends BankProduct> extends CrudS
     List<T> getByOwner(AccountHolder owner);
 
     default T populateBankProduct(CreateBankProductDao<T> dao, AccountHolderService accountHolderService) {
-        T checkingAccount = dao.getProduct();
-        if (checkingAccount instanceof Account) {
-            ((Account) checkingAccount).setStatus(ACTIVE);
-            ((Account) checkingAccount).setCreationDate(today());
-        }
-        if (checkingAccount instanceof HasPeriodicChanges) {
-            ((HasPeriodicChanges) checkingAccount).setLastMaintenanceDate(today());
-        }
-        checkingAccount.setPrimaryOwner(accountHolderService.getById(dao.getPrimaryOwnerId()));
+        T product = dao.getProduct();
+        if (product.getCreationDate() == null) product.setCreationDate(today());
+        if (product instanceof Account && ((Account) product).getStatus() == null)
+            ((Account) product).setStatus(ACTIVE);
+        if (product instanceof HasPeriodicChanges)
+            ((HasPeriodicChanges) product).setLastMaintenanceDate(product.getCreationDate());
+
+        product.setPrimaryOwner(accountHolderService.getById(dao.getPrimaryOwnerId()));
+
         try {
             if (dao.getSecondaryOwnerId() != null)
-                checkingAccount.setSecondaryOwner(accountHolderService.getById(dao.getSecondaryOwnerId()));
+                product.setSecondaryOwner(accountHolderService.getById(dao.getSecondaryOwnerId()));
         } catch (ResponseStatusException ignored) {
         }
 
-        return checkingAccount;
+        return product;
     }
 
 }

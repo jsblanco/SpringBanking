@@ -1,7 +1,6 @@
 package com.jsblanco.springbanking.models.products;
 
 import com.jsblanco.springbanking.models.users.AccountHolder;
-import com.jsblanco.springbanking.util.DateUtils;
 import com.jsblanco.springbanking.models.util.Status;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -15,8 +14,6 @@ public abstract class Account extends BankProduct {
 
     @NotNull
     private String secretKey;
-    @NotNull
-    private Date creationDate;
 
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -28,9 +25,8 @@ public abstract class Account extends BankProduct {
     }
 
     public Account(Integer id, BigDecimal amount, AccountHolder primaryOwner, @NotNull String secretKey, @NotNull Date creationDate, Status status) {
-        super(id, amount, primaryOwner);
+        super(id, amount, primaryOwner, creationDate);
         this.secretKey = secretKey;
-        this.creationDate = DateUtils.round(creationDate);
         this.status = status;
     }
 
@@ -40,14 +36,6 @@ public abstract class Account extends BankProduct {
 
     public void setSecretKey(String secretKey) {
         this.secretKey = secretKey;
-    }
-
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
     }
 
     public Status getStatus() {
@@ -62,7 +50,7 @@ public abstract class Account extends BankProduct {
     public String toString() {
         return super.toString()
                 + secretKey
-                + creationDate
+                + getCreationDate()
                 + status;
     }
 
@@ -71,7 +59,7 @@ public abstract class Account extends BankProduct {
         if (obj instanceof Account account)
             return super.equals(obj)
                     && secretKey.equals(account.getSecretKey())
-                    && creationDate.equals(account.getCreationDate())
+                    && getCreationDate().equals(account.getCreationDate())
                     && status.equals(account.getStatus());
         return false;
     }

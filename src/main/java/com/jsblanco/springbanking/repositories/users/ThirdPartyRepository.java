@@ -10,4 +10,5 @@ import javax.validation.constraints.NotNull;
 @Repository
 public interface ThirdPartyRepository extends JpaRepository<ThirdParty, Integer> {
     ThirdParty getThirdPartyByUsername(@NotNull String username);
+    ThirdParty getThirdPartyByHashedKey(@NotNull String hashedKey);
 }

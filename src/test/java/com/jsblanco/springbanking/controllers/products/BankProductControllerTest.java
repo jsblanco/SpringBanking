@@ -3,6 +3,7 @@ package com.jsblanco.springbanking.controllers.products;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.jsblanco.springbanking.config.CustomUserDetails;
 import com.jsblanco.springbanking.dao.TransferFundsDao;
 import com.jsblanco.springbanking.models.products.*;
 import com.jsblanco.springbanking.models.users.AccountHolder;
@@ -76,6 +77,7 @@ class BankProductControllerTest {
     private WebApplicationContext webApplicationContext;
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    CustomUserDetails loggedUserData;
 
     @BeforeEach
     void setUp() {
@@ -86,7 +88,7 @@ class BankProductControllerTest {
         holder1 = accountHolderRepository.save(new AccountHolder("Holder1", "BankProductControllerTestHolder1","Password1", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
         holder2 = accountHolderRepository.save(new AccountHolder("Holder2","BankProductControllerTestHolder2", "Password2", LocalDate.of(1990, 1, 1), new Address("door", "postalCode", "city", "country")));
 
-        creditCard = creditCardRepository.save(new CreditCard(1, new BigDecimal(1000), holder1));
+        creditCard = creditCardRepository.save(new CreditCard(1, new BigDecimal(1000), new Date(), holder1));
         savingsAccount = savingsAccountRepository.save(new SavingsAccount(2, new BigDecimal(1000), holder1, "secret", new Date(), Status.ACTIVE));
         checkingAccount = checkingAccountRepository.save(new CheckingAccount(3, new BigDecimal(1000), holder1, "secret", new Date(), Status.ACTIVE));
         studentCheckingAccount = studentCheckingAccountRepository.save(new StudentCheckingAccount(new CheckingAccount(4, new BigDecimal(1000), holder2, "secret", new Date(), Status.ACTIVE)));
@@ -95,7 +97,9 @@ class BankProductControllerTest {
         SecurityContext securityContext = mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(holder1);
+        loggedUserData = new CustomUserDetails();
+        loggedUserData.setUser(holder1);
+        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(loggedUserData);
     }
 
     @AfterEach
@@ -118,12 +122,14 @@ class BankProductControllerTest {
         List<BankProduct> productList = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), new TypeReference<>() {
         });
 
-        assertEquals(4, productList.size());
-        assertTrue(productList.containsAll(new ArrayList<>(Arrays.asList(savingsAccount, creditCard, checkingAccount, studentCheckingAccount))));
+        assertEquals(3, productList.size());
+        assertTrue(productList.containsAll(new ArrayList<>(Arrays.asList(savingsAccount, creditCard, checkingAccount))));
     }
 
     @Test
     void getBankProductById() throws Exception {
+        loggedUserData.setUser(admin);
+
         MvcResult mvcResult = mockMvc.perform(get("/product/" + creditCard.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -167,7 +173,7 @@ class BankProductControllerTest {
         Money fetchedSavingsAccountBalance = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Money.class);
         assertEquals(fetchedSavingsAccountBalance, savingsAccount.getBalance());
 
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(admin);
+        loggedUserData.setUser(admin);
         mvcResult = mockMvc.perform(get("/product/balance/"+ savingsAccount.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -176,7 +182,7 @@ class BankProductControllerTest {
         fetchedSavingsAccountBalance = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Money.class);
         assertEquals(fetchedSavingsAccountBalance, savingsAccount.getBalance());
 
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(holder2);
+        loggedUserData.setUser(holder2);
         mockMvc.perform(get("/product/balance/" + savingsAccount.getId()))
                 .andExpect(status().isForbidden());
     }

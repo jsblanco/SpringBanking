@@ -79,7 +79,7 @@ class BankProductServiceTest {
         thirdParty1 = thirdPartyRepository.save(new ThirdParty("Third party 1", randomUUID().toString(), "Password1", "Secret key 1"));
         thirdParty2 = thirdPartyRepository.save(new ThirdParty("Third party 2", randomUUID().toString(), "Password2", "Secret key 2"));
 
-        creditCard = creditCardRepository.save(new CreditCard(1, new BigDecimal(1000), holder1));
+        creditCard = creditCardRepository.save(new CreditCard(1, new BigDecimal(1000), new Date(), holder1));
         savingsAccount = savingsAccountRepository.save(new SavingsAccount(2, new BigDecimal(1000), holder1, "secret savings", new Date(), Status.ACTIVE));
         checkingAccount = checkingAccountRepository.save(new CheckingAccount(3, new BigDecimal(1000), holder1, "secret checking", new Date(), Status.ACTIVE));
         studentCheckingAccount = studentCheckingAccountRepository.save(new StudentCheckingAccount(new CheckingAccount(4, new BigDecimal(1000), holder2, "secret", new Date(), Status.ACTIVE)));
@@ -106,7 +106,7 @@ class BankProductServiceTest {
 
     @Test
     void save() {
-        CreateBankProductDao<CreditCard> creditCardDao = new CreateBankProductDao<>(new CreditCard(99, new BigDecimal(1111),null), holder2.getId());
+        CreateBankProductDao<CreditCard> creditCardDao = new CreateBankProductDao<>(new CreditCard(99, new BigDecimal(1111), new Date(), null), holder2.getId());
         CreditCard newCreditCard = this.creditCardService.createNewProduct(creditCardDao);
         assertEquals(newCreditCard, this.bankProductService.get(newCreditCard.getId()), "Should store new credit cards");
         assertThrows(ResponseStatusException.class, () -> this.bankProductService.save(new CreateBankProductDao<>(newCreditCard, holder2.getId())), "Should not let save products if they're already in the db");

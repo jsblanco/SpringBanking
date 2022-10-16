@@ -1,11 +1,12 @@
 package com.jsblanco.springbanking.controllers.products;
 
+import com.jsblanco.springbanking.config.CustomUserDetails;
 import com.jsblanco.springbanking.dao.CreateBankProductDao;
 import com.jsblanco.springbanking.dao.ThirdPartyTransferDao;
 import com.jsblanco.springbanking.dao.TransferFundsDao;
 import com.jsblanco.springbanking.models.products.Account;
 import com.jsblanco.springbanking.models.products.BankProduct;
-import com.jsblanco.springbanking.models.users.User;
+import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.Money;
 import com.jsblanco.springbanking.services.products.interfaces.AccountService;
 import com.jsblanco.springbanking.services.products.interfaces.BankProductService;
@@ -27,6 +28,13 @@ public class BankProductController {
 
     @GetMapping("/product/")
     @ResponseStatus(HttpStatus.OK)
+    public List<BankProduct> getAllUserBankProducts() {
+        CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return this.bankProductService.getByOwner((AccountHolder) user.getUser());
+    }
+
+    @GetMapping("/product/all")
+    @ResponseStatus(HttpStatus.OK)
     public List<BankProduct> getAllBankProducts() {
         return this.bankProductService.getAll();
     }
@@ -34,14 +42,15 @@ public class BankProductController {
     @GetMapping("/product/{id}")
     @ResponseStatus(HttpStatus.OK)
     public BankProduct getBankProductById(@PathVariable Integer id) {
-        return this.bankProductService.get(id);
+        CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return this.bankProductService.getProductData(id, user.getUser());
     }
 
     @GetMapping("/product/balance/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Money getBankProductBalance(@PathVariable Integer id) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return this.bankProductService.getProductBalance(id, user);
+        CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return this.bankProductService.getProductBalance(id, user.getUser());
     }
 
     @PostMapping("/product/")
@@ -59,14 +68,14 @@ public class BankProductController {
     @PostMapping("/product/transfer")
     @ResponseStatus(HttpStatus.CREATED)
     public List<Account> transferFundsBetweenProducts(@RequestBody @Valid TransferFundsDao dao) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return this.accountService.transferFunds(dao, user);
+        CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return this.accountService.transferFunds(dao, user.getUser());
     }
 
     @PostMapping("/product/thirdparty")
     @ResponseStatus(HttpStatus.CREATED)
     public void thirdPartyOperation(@RequestHeader String hashedKey, @RequestBody @Valid ThirdPartyTransferDao dao) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        this.accountService.thirdPartyOperation(hashedKey, dao, user);
+        CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        this.accountService.thirdPartyOperation(hashedKey, dao, user.getUser());
     }
 }

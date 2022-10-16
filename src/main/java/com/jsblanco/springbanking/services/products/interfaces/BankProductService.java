@@ -14,6 +14,7 @@ public interface BankProductService {
     BankProduct update(BankProduct bankProduct);
     void delete(Integer id);
 
+    BankProduct getProductData(Integer id, User user);
     Money getProductBalance(Integer id, User user);
     Money modifyProductBalance(Integer id, Money balanceChange);
 

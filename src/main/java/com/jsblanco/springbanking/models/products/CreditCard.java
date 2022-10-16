@@ -54,8 +54,8 @@ public class CreditCard extends BankProduct implements HasInterestRate {
         this.lastMaintenanceDate = DateUtils.today();
     }
 
-    public CreditCard(Integer id, BigDecimal amount, AccountHolder primaryOwner) {
-        super(id, amount, primaryOwner);
+    public CreditCard(Integer id, BigDecimal amount, Date creationDate, AccountHolder primaryOwner) {
+        super(id, amount, primaryOwner, creationDate);
         setCreditLimit(defaultCreditLimit);
         setInterestRate(defaultInterestRate);
         this.lastMaintenanceDate = DateUtils.today();

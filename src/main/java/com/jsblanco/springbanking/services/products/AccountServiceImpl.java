@@ -7,6 +7,7 @@ import com.jsblanco.springbanking.models.products.*;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.users.ThirdParty;
 import com.jsblanco.springbanking.models.users.User;
+import com.jsblanco.springbanking.models.util.Money;
 import com.jsblanco.springbanking.models.util.Status;
 import com.jsblanco.springbanking.services.products.interfaces.AccountService;
 import com.jsblanco.springbanking.services.products.interfaces.CheckingAccountService;
@@ -14,12 +15,12 @@ import com.jsblanco.springbanking.services.products.interfaces.SavingsAccountSer
 import com.jsblanco.springbanking.services.products.interfaces.StudentCheckingAccountService;
 import com.jsblanco.springbanking.services.products.interfaces.util.BankProductSubclassService;
 import com.jsblanco.springbanking.services.users.interfaces.AccountHolderService;
+import com.jsblanco.springbanking.services.users.interfaces.ThirdPartyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 import static com.jsblanco.springbanking.util.DateUtils.*;
@@ -35,6 +36,8 @@ public class AccountServiceImpl implements AccountService {
     StudentCheckingAccountService studentCheckingAccountService;
     @Autowired
     AccountHolderService accountHolderService;
+    @Autowired
+    ThirdPartyService thirdPartyService;
 
     public Account get(Integer id) {
 
@@ -132,20 +135,21 @@ public class AccountServiceImpl implements AccountService {
         return new ArrayList<>(Arrays.asList(this.update(emitterAcc), this.update(recipientAcc)));
     }
 
-    public void thirdPartyOperation(String hashedKey, ThirdPartyTransferDao transferData, User user) {
+    @Override
+    public void thirdPartyOperation(String hashedKey, ThirdPartyTransferDao dao, User user) {
         if (!(user instanceof ThirdParty))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This action can only be performed by a third party user");
         if (!((ThirdParty) user).getHashedKey().equals(hashedKey))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Provided hashed key does not match logged user");
 
-        Account account = get(transferData.getAccountId());
-        if (!account.getSecretKey().equals(transferData.getSecretKey()))
+        Account account = get(dao.getAccountId());
+        if (!account.getSecretKey().equals(dao.getSecretKey()))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Provided secret key does not match requested account");
 
-        if (transferData.getTransfer().getAmount().compareTo(BigDecimal.ZERO) > 0)
-            account.increaseBalance(transferData.getTransfer());
+        if (dao.getTransfer().getAmount().signum() > 0)
+            account.increaseBalance(new Money(dao.getTransfer().getAmount().abs(), dao.getTransfer().getCurrency()));
         else
-            account.decreaseBalance(transferData.getTransfer());
+            account.decreaseBalance(new Money(dao.getTransfer().getAmount().abs(), dao.getTransfer().getCurrency()));
 
         this.update(account);
     }

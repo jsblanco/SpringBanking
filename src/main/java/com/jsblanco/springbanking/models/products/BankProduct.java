@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.jsblanco.springbanking.models.interfaces.HasBalance;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.util.Money;
+import com.jsblanco.springbanking.util.DateUtils;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import javax.validation.constraints.NotNull;
@@ -14,18 +15,13 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Currency;
+import java.util.Date;
 import java.util.Objects;
 
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-//@JsonSubTypes({
-//        @JsonSubTypes.Type(value= CreditCard.class , name="creditCard"),
-//        @JsonSubTypes.Type(value= SavingsAccount.class, name="savingsAccount"),
-//        @JsonSubTypes.Type(value= CheckingAccount.class, name="checkingAccount"),
-//        @JsonSubTypes.Type(value= StudentCheckingAccount.class, name="studentCheckingAccount")
-//})
 @DiscriminatorColumn(name = "product_type")
 public abstract class BankProduct implements HasBalance {
     @Id
@@ -44,13 +40,17 @@ public abstract class BankProduct implements HasBalance {
     @JoinColumn(name = "secondary_owner", nullable = true)
     private AccountHolder secondaryOwner;
 
+    @NotNull
+    private Date creationDate;
+
     public BankProduct() {
     }
 
-    public BankProduct(Integer id, BigDecimal amount, AccountHolder primaryOwner) {
+    public BankProduct(Integer id, BigDecimal amount, AccountHolder primaryOwner, Date creationDate) {
         this.id = id;
         this.amount = amount.setScale(2, RoundingMode.HALF_EVEN);
         this.primaryOwner = primaryOwner;
+        this.creationDate = DateUtils.round(creationDate);
     }
 
     public void checkCurrency(Currency currency) {
@@ -119,6 +119,14 @@ public abstract class BankProduct implements HasBalance {
 
     public boolean isOwnedBy(AccountHolder user) {
         return this.primaryOwner.equals(user) || (this.secondaryOwner != null && this.secondaryOwner.equals(user));
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 
     @Nullable
