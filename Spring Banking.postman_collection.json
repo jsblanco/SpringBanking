@@ -558,7 +558,7 @@
 							"basic": [
 								{
 									"key": "username",
-									"value": "Jorge1",
+									"value": "Admin1",
 									"type": "string"
 								},
 								{
@@ -881,7 +881,7 @@
 					"response": []
 				},
 				{
-					"name": "Get user products",
+					"name": "Get user's own products",
 					"request": {
 						"auth": {
 							"type": "basic",
@@ -951,7 +951,7 @@
 					"response": []
 				},
 				{
-					"name": "Get data from product of different user",
+					"name": "Get data from product of different user (should fail)",
 					"request": {
 						"auth": {
 							"type": "basic",
