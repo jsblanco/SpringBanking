@@ -4,6 +4,7 @@ import com.jsblanco.springbanking.config.CustomUserDetails;
 import com.jsblanco.springbanking.dao.CreateBankProductDao;
 import com.jsblanco.springbanking.dao.ThirdPartyTransferDao;
 import com.jsblanco.springbanking.dao.TransferFundsDao;
+import com.jsblanco.springbanking.models.interfaces.HasPeriodicChanges;
 import com.jsblanco.springbanking.models.products.Account;
 import com.jsblanco.springbanking.models.products.BankProduct;
 import com.jsblanco.springbanking.models.users.AccountHolder;
@@ -11,11 +12,13 @@ import com.jsblanco.springbanking.models.util.Money;
 import com.jsblanco.springbanking.services.products.interfaces.AccountService;
 import com.jsblanco.springbanking.services.products.interfaces.BankProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -63,6 +66,12 @@ public class BankProductController {
     @ResponseStatus(HttpStatus.CREATED)
     public BankProduct updateBankProducts(@RequestBody BankProduct product) {
         return this.bankProductService.update(product);
+    }
+
+    @PatchMapping("/product/maintenance/{id}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public HasPeriodicChanges updateLastMaintenanceDate(@PathVariable Integer id, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return this.bankProductService.updateLastMaintenanceDate(id, date);
     }
 
     @PostMapping("/product/balance/{id}")

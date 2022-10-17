@@ -1,6 +1,7 @@
 package com.jsblanco.springbanking.services.products;
 
 import com.jsblanco.springbanking.dao.CreateBankProductDao;
+import com.jsblanco.springbanking.models.interfaces.HasPeriodicChanges;
 import com.jsblanco.springbanking.models.products.*;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.models.users.Admin;
@@ -13,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @Service
@@ -87,6 +90,15 @@ public class BankProductServiceImpl implements BankProductService {
         if (user instanceof Admin || product.isOwnedBy((AccountHolder) user))
             return product;
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account data can only be consulted by its owners.");
+    }
+
+    @Override
+    public HasPeriodicChanges updateLastMaintenanceDate(Integer id, LocalDate maintenanceDate) {
+        BankProduct bankProduct = get(id);
+        if (!(bankProduct instanceof HasPeriodicChanges))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Selected product does not require maintenance");
+        ((HasPeriodicChanges) bankProduct).setLastMaintenanceDate(Date.from(maintenanceDate.atStartOfDay().toInstant(ZoneOffset.UTC)));
+        return (HasPeriodicChanges) fetchProductService(bankProduct).save(bankProduct);
     }
 
     @Override

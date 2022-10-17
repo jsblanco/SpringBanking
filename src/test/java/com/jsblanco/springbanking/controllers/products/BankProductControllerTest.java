@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static com.jsblanco.springbanking.util.DateUtils.getDateLocalValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -228,6 +229,27 @@ class BankProductControllerTest {
 
         CheckingAccount fetchedCheckingAccount = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), CheckingAccount.class);
         assertEquals(fetchedCheckingAccount, checkingAccount);
+    }
+
+    @Test
+    void updateLastMaintenanceDate() throws Exception {
+        LocalDate newMaintenanceDate = getDateLocalValue(creditCard.getLastMaintenanceDate()).minusMonths(2);
+        MvcResult mvcResult = mockMvc.perform(patch("/product/maintenance/"+creditCard.getId())
+                        .param("date", newMaintenanceDate.toString())
+                )
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        CreditCard updatedCreditCard = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), CreditCard.class);
+        assertEquals(creditCard.getId(), updatedCreditCard.getId());
+        assertEquals(new Money(new BigDecimal("1033.68")), updatedCreditCard.getBalance());
+
+        mockMvc.perform(patch("/product/maintenance/"+studentCheckingAccount.getId())
+                        .param("date", newMaintenanceDate.toString())
+                )
+                .andExpect(status().isBadRequest())
+                .andReturn();
     }
 
     @Test
