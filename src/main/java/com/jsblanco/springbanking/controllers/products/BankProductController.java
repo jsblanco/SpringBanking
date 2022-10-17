@@ -59,6 +59,12 @@ public class BankProductController {
         return this.bankProductService.save(dao);
     }
 
+    @PutMapping("/product/")
+    @ResponseStatus(HttpStatus.CREATED)
+    public BankProduct updateBankProducts(@RequestBody BankProduct product) {
+        return this.bankProductService.update(product);
+    }
+
     @PostMapping("/product/balance/{id}")
     @ResponseStatus(HttpStatus.CREATED)
     public Money modifyBankProductBalance(@PathVariable Integer id, @RequestBody @Valid Money newBalance) {
@@ -77,5 +83,11 @@ public class BankProductController {
     public void thirdPartyOperation(@RequestHeader String hashedKey, @RequestBody @Valid ThirdPartyTransferDao dao) {
         CustomUserDetails user = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         this.accountService.thirdPartyOperation(hashedKey, dao, user.getUser());
+    }
+
+    @DeleteMapping("/product/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteBankProducts(@PathVariable Integer id) {
+        this.bankProductService.delete(id);
     }
 }

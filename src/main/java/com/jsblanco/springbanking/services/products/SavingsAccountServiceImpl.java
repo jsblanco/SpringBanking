@@ -47,6 +47,10 @@ public class SavingsAccountServiceImpl implements SavingsAccountService {
         Optional<SavingsAccount> savingsAccount = this.savingsAccountRepository.findById(account.getId());
         if (savingsAccount.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
+        if (account.getPrimaryOwner() == null)
+            account.setPrimaryOwner(savingsAccount.get().getPrimaryOwner());
+        if (account.getSecondaryOwner() == null && savingsAccount.get().getSecondaryOwner() != null)
+            account.setSecondaryOwner(savingsAccount.get().getSecondaryOwner());
         return this.savingsAccountRepository.save(account);
     }
 

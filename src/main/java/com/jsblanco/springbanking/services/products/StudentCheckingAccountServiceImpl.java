@@ -46,6 +46,10 @@ public class StudentCheckingAccountServiceImpl implements StudentCheckingAccount
         Optional<StudentCheckingAccount> studentCheckingAccount = this.studentCheckingAccountRepository.findById(account.getId());
         if (studentCheckingAccount.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
+        if (account.getPrimaryOwner() == null)
+            account.setPrimaryOwner(studentCheckingAccount.get().getPrimaryOwner());
+        if (account.getSecondaryOwner() == null && studentCheckingAccount.get().getSecondaryOwner() != null)
+            account.setSecondaryOwner(studentCheckingAccount.get().getSecondaryOwner());
         return this.studentCheckingAccountRepository.save(account);
     }
 

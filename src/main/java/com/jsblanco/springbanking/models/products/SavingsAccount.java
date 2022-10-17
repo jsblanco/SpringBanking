@@ -1,6 +1,7 @@
 package com.jsblanco.springbanking.models.products;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.jsblanco.springbanking.models.interfaces.HasInterestRate;
 import com.jsblanco.springbanking.models.interfaces.HasMinimumBalance;
 import com.jsblanco.springbanking.models.users.AccountHolder;
@@ -22,6 +23,7 @@ import java.util.Date;
 
 @Entity
 @DiscriminatorValue("savings_account")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 public class SavingsAccount extends Account implements HasInterestRate, HasMinimumBalance {
 
     @NotNull

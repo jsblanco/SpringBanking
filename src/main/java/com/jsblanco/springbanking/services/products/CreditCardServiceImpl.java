@@ -46,6 +46,10 @@ public class CreditCardServiceImpl implements CreditCardService {
         Optional<CreditCard> creditCard = this.creditCardRepository.findById(account.getId());
         if (creditCard.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
+        if (account.getPrimaryOwner() == null)
+            account.setPrimaryOwner(creditCard.get().getPrimaryOwner());
+        if (account.getSecondaryOwner() == null && creditCard.get().getSecondaryOwner() != null)
+            account.setSecondaryOwner(creditCard.get().getSecondaryOwner());
         return this.creditCardRepository.save(account);
     }
 

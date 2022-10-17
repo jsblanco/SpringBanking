@@ -211,6 +211,33 @@ class BankProductControllerTest {
         expectedRecipientBalance.increaseAmount(transfer);
         assertEquals(fetchedSavingsAccount.get(0).getBalance(), expectedEmitterBalance);
         assertEquals(fetchedSavingsAccount.get(1).getBalance(), expectedRecipientBalance);
+    }
 
+    @Test
+    void updateBankProducts() throws Exception {
+        checkingAccount.setBalance(new Money(new BigDecimal(10000)));
+        checkingAccount.setPrimaryOwner(holder2);
+        String payload = objectMapper.writeValueAsString(checkingAccount);
+        MvcResult mvcResult = mockMvc.perform(put("/product/")
+                        .content(payload)
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        CheckingAccount fetchedCheckingAccount = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), CheckingAccount.class);
+        assertEquals(fetchedCheckingAccount, checkingAccount);
+    }
+
+    @Test
+    void deleteBankProducts() throws Exception {
+        mockMvc.perform(delete("/product/" + savingsAccount.getId()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        mockMvc.perform(get("/product/" + savingsAccount.getId()))
+                .andExpect(status().isNotFound())
+                .andReturn();
     }
 }

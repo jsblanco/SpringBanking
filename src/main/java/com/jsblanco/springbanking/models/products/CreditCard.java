@@ -1,9 +1,6 @@
 package com.jsblanco.springbanking.models.products;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import com.jsblanco.springbanking.models.interfaces.HasInterestRate;
 import com.jsblanco.springbanking.models.users.AccountHolder;
 import com.jsblanco.springbanking.util.DateUtils;
@@ -24,6 +21,7 @@ import java.util.Date;
 
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @DiscriminatorValue("credit_card")
 public class CreditCard extends BankProduct implements HasInterestRate {
 

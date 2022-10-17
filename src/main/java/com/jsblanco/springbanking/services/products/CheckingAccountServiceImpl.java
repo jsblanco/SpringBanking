@@ -38,6 +38,10 @@ public class CheckingAccountServiceImpl implements CheckingAccountService {
         Optional<CheckingAccount> checkingAccount = this.checkingAccountRepository.findById(account.getId());
         if (checkingAccount.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such account exists in the database");
+        if (account.getPrimaryOwner() == null)
+            account.setPrimaryOwner(checkingAccount.get().getPrimaryOwner());
+        if (account.getSecondaryOwner() == null && checkingAccount.get().getSecondaryOwner() != null)
+            account.setSecondaryOwner(checkingAccount.get().getSecondaryOwner());
         return this.checkingAccountRepository.save(account);
     }
 

@@ -62,7 +62,11 @@ public class BankProductServiceImpl implements BankProductService {
     @Override
     public BankProduct update(BankProduct bankProduct) {
         try {
-            get(bankProduct.getId());
+            BankProduct dbProduct = get(bankProduct.getId());
+            if (bankProduct.getPrimaryOwner() == null)
+                bankProduct.setPrimaryOwner(dbProduct.getPrimaryOwner());
+            if (bankProduct.getSecondaryOwner() == null && dbProduct.getSecondaryOwner() != null)
+                bankProduct.setSecondaryOwner(dbProduct.getSecondaryOwner());
         } catch (ResponseStatusException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such product exists in the database");
         }

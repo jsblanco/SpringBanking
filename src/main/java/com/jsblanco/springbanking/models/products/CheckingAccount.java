@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @DiscriminatorValue("checking_account")
 public class CheckingAccount extends Account implements HasMinimumBalance, HasMaintenanceFee {
 
