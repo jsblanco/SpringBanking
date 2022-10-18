@@ -17,6 +17,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Calendar;
 import java.util.Date;
 
 @Entity
@@ -34,7 +35,7 @@ public class CreditCard extends BankProduct implements HasInterestRate {
     @Digits(integer = 1, fraction = 4)
     @Column(precision = 1, scale = 4)
     private BigDecimal interestRate;
-    @NotNull @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-mm-dd")
+    @NotNull
     private Date lastMaintenanceDate;
 
     @Transient @JsonIgnore
@@ -93,7 +94,8 @@ public class CreditCard extends BankProduct implements HasInterestRate {
 
     public int getOverduePeriods(Date lastMaintenanceDate) {
         Date today = DateUtils.today();
-        return DateUtils.getPeriodBetweenDates(lastMaintenanceDate, today).getMonths();
+        return DateUtils.getPeriodBetweenDates(lastMaintenanceDate, today).getMonths()
+                + (DateUtils.getPeriodBetweenDates(lastMaintenanceDate, today).getYears() * 12);
     }
 
     @NotNull
@@ -101,12 +103,22 @@ public class CreditCard extends BankProduct implements HasInterestRate {
         return lastMaintenanceDate;
     }
 
+    /**
+     * This setter is tricky. It relies on how Spring populates Java Beans to ensure any maintenance is calculated automatically upon fetching from the backend.
+     * This way, the user or admin will never deal with any product with due maintenance.
+     * @param lastMaintenanceDate the last maintenance date from the DB.
+     */
     public void setLastMaintenanceDate(@NotNull Date lastMaintenanceDate) {
+        if (this.lastMaintenanceDate == null)
+            this.lastMaintenanceDate = lastMaintenanceDate;
         int overduePeriods = getOverduePeriods(lastMaintenanceDate);
         BigDecimal monthlyInterestRate = getInterestRate().divide(new BigDecimal(12), RoundingMode.HALF_EVEN);
         if (overduePeriods > 0) {
             setBalance(new Money(addInterest(getAmount(), monthlyInterestRate, overduePeriods), getCurrency()));
-            this.lastMaintenanceDate = DateUtils.today();
+            Calendar c = Calendar.getInstance();
+            c.setTime(lastMaintenanceDate);
+            c.add(Calendar.MONTH, overduePeriods);
+            this.lastMaintenanceDate = c.getTime();
         }
     }
 

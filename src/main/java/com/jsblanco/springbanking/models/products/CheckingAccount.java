@@ -14,6 +14,7 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
 
 @Entity
@@ -52,10 +53,10 @@ public class CheckingAccount extends Account implements HasMinimumBalance, HasMa
         return new Money(monthlyMaintenanceFee, getCurrency());
     }
 
-    public int getOverduePeriods(Date lastAccess) {
+    public int getOverduePeriods(Date lastMaintenanceDate) {
         Date today = DateUtils.today();
-        return DateUtils.getPeriodBetweenDates(lastAccess, today).getMonths()
-                + (DateUtils.getPeriodBetweenDates(lastAccess, today).getYears() * 12);
+        return DateUtils.getPeriodBetweenDates(lastMaintenanceDate, today).getMonths()
+                + (DateUtils.getPeriodBetweenDates(lastMaintenanceDate, today).getYears() * 12);
     }
 
     @NotNull
@@ -63,14 +64,21 @@ public class CheckingAccount extends Account implements HasMinimumBalance, HasMa
         return lastMaintenanceDate;
     }
 
+    /**
+     * This setter is tricky. It relies on how Spring populates Java Beans to ensure any maintenance is calculated automatically upon fetching from the backend.
+     * This way, the user or admin will never deal with any product with due maintenance.
+     * @param lastMaintenanceDate the last maintenance date from the DB.
+     */
     public void setLastMaintenanceDate(@NotNull Date lastMaintenanceDate) {
         if (this.lastMaintenanceDate == null)
             this.lastMaintenanceDate = lastMaintenanceDate;
-
         int overduePeriods = getOverduePeriods(lastMaintenanceDate);
         if (overduePeriods > 0) {
             setBalance(new Money(subtractMaintenance(monthlyMaintenanceFee, overduePeriods), getCurrency()));
-            this.lastMaintenanceDate = DateUtils.today();
+            Calendar c = Calendar.getInstance();
+            c.setTime(lastMaintenanceDate);
+            c.add(Calendar.MONTH, overduePeriods);
+            this.lastMaintenanceDate = c.getTime();
         }
     }
 

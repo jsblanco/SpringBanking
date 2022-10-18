@@ -71,6 +71,7 @@ class CreditCardTest {
     void setLastAccess() {
         creditCard.setBalance(new Money(new BigDecimal("1000"), creditCard.getCurrency()));
         creditCard.setLastMaintenanceDate(Date.from(LocalDate.now().atStartOfDay().minusMonths(1).toInstant(ZoneOffset.UTC)));
+        System.out.println(creditCard.getLastMaintenanceDate());
         assertEquals(new Money(new BigDecimal("1016.70"), creditCard.getCurrency()), creditCard.getBalance(), "Should apply interest once if a month has elapsed");
         assertEquals(creditCard.getLastMaintenanceDate(), DateUtils.today());
     }
