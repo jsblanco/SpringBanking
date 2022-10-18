@@ -65,7 +65,8 @@ public class CheckingAccount extends Account implements HasMinimumBalance, HasMa
     }
 
     /**
-     * This setter is tricky. It relies on how Spring populates Java Beans to ensure any maintenance is calculated automatically upon fetching from the backend.
+     * This setter is tricky. It relies on how Spring populates Java Beans to ensure any maintenance is calculated
+     * automatically upon fetching from the backend.
      * This way, the user or admin will never deal with any product with due maintenance.
      * @param lastMaintenanceDate the last maintenance date from the DB.
      */

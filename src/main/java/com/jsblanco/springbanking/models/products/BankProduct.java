@@ -82,7 +82,7 @@ public abstract class BankProduct implements HasBalance {
         checkCurrency(deposit.getCurrency());
 
         Money finalBalance = getBalance();
-        finalBalance.increaseAmount(deposit);
+        finalBalance.decreaseAmount(new Money(deposit.getAmount().abs(), getCurrency()));
         setBalance(finalBalance);
     }
 
@@ -90,7 +90,7 @@ public abstract class BankProduct implements HasBalance {
         checkCurrency(deposit.getCurrency());
 
         Money finalBalance = getBalance();
-        finalBalance.decreaseAmount(deposit);
+        finalBalance.decreaseAmount(new Money(deposit.getAmount().abs(), getCurrency()));
         setBalance(finalBalance);
     }
 
