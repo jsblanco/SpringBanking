@@ -147,9 +147,9 @@ public class AccountServiceImpl implements AccountService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Provided secret key does not match requested account");
 
         if (dao.getTransfer().getAmount().signum() > 0)
-            account.increaseBalance(new Money(dao.getTransfer().getAmount().abs(), dao.getTransfer().getCurrency()));
+            account.increaseBalance(dao.getTransfer());
         else
-            account.decreaseBalance(new Money(dao.getTransfer().getAmount().abs(), dao.getTransfer().getCurrency()));
+            account.decreaseBalance(dao.getTransfer());
 
         this.update(account);
     }

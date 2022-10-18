@@ -33,6 +33,10 @@ class BankProductTest {
         bankProduct.increaseBalance(new Money(new BigDecimal(10), Currency.getInstance("USD")));
         assertEquals(new Money(new BigDecimal(1010), Currency.getInstance("USD")), bankProduct.getBalance(), "Should increase balance when currencies are the same");
 
+        bankProduct.setBalance(new Money(new BigDecimal(1000), Currency.getInstance("USD")));
+        bankProduct.increaseBalance(new Money(new BigDecimal(-1000), Currency.getInstance("USD")));
+        assertEquals(new Money(new BigDecimal(2000), Currency.getInstance("USD")), bankProduct.getBalance(), "Should decrease balance even if provided value is negative");
+
         assertThrows(IllegalArgumentException.class, () -> bankProduct.increaseBalance(new Money(new BigDecimal(1000), Currency.getInstance("EUR"))), "Should throw an exception when currencies differ");
     }
 
@@ -45,6 +49,10 @@ class BankProductTest {
 
         bankProduct.decreaseBalance(new Money(new BigDecimal(1000), Currency.getInstance("USD")));
         assertEquals(new Money(new BigDecimal(-10), Currency.getInstance("USD")), bankProduct.getBalance(), "Should decrease balance below 0 when more money than available is extracted");
+
+        bankProduct.setBalance(new Money(new BigDecimal(1000), Currency.getInstance("USD")));
+        bankProduct.decreaseBalance(new Money(new BigDecimal(-1000), Currency.getInstance("USD")));
+        assertEquals(new Money(new BigDecimal(0), Currency.getInstance("USD")), bankProduct.getBalance(), "Should decrease balance even if provided value is negative");
 
         assertThrows(IllegalArgumentException.class, () -> bankProduct.decreaseBalance(new Money(new BigDecimal(1000), Currency.getInstance("EUR"))), "Should throw an exception when currencies differ");
     }
