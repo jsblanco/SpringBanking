@@ -59,7 +59,7 @@ public class AccountServiceImpl implements AccountService {
         try {
             get(bankProduct.getId());
         } catch (ResponseStatusException e) {
-            return (Account) fetchProductRepository(bankProduct).save(bankProduct);
+            return (Account) fetchProductService(bankProduct).save(bankProduct);
         }
         throw new ResponseStatusException(HttpStatus.CONFLICT, "There is already a product with this ID inside the database");
     }
@@ -70,7 +70,7 @@ public class AccountServiceImpl implements AccountService {
         } catch (ResponseStatusException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such product exists in the database");
         }
-        return (Account) fetchProductRepository(bankProduct).save(bankProduct);
+        return (Account) fetchProductService(bankProduct).save(bankProduct);
     }
 
     @Override
@@ -154,7 +154,12 @@ public class AccountServiceImpl implements AccountService {
         this.update(account);
     }
 
-    private BankProductSubclassService fetchProductRepository(Account bankProduct) {
+    /**
+     * Función para buscar el servicio adecuado para el bankProduct aportado sin duplicar código.
+     * @param bankProduct producto recibido por la API.
+     * @return servicio apropiado para la subclase del bankProduct aportado.
+     */
+    private BankProductSubclassService fetchProductService(Account bankProduct) {
         if (CheckingAccount.class.equals(bankProduct.getClass())) {
             return this.checkingAccountService;
         }

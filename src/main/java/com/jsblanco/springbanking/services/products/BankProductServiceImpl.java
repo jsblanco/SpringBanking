@@ -144,6 +144,11 @@ public class BankProductServiceImpl implements BankProductService {
         return accounts.stream().toList();
     }
 
+    /**
+     * Función para buscar el servicio adecuado para el bankProduct aportado sin duplicar código.
+     * @param bankProduct producto recibido por la API.
+     * @return servicio apropiado para la subclase del bankProduct aportado.
+     */
     private BankProductSubclassService fetchProductService(BankProduct bankProduct) {
         if (CreditCard.class.equals(bankProduct.getClass())) {
             return this.creditCardService;

@@ -21,6 +21,7 @@ import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 
+// Fachada principal para controlar todos los productos de forma centralizada.
 @RestController
 public class BankProductController {
 

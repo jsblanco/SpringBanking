@@ -8,6 +8,9 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ * Bank product subclass with all properties common to all accounts which Credit Cards lack.
+ */
 @Entity
 @DiscriminatorValue("bank_account")
 public abstract class Account extends BankProduct {

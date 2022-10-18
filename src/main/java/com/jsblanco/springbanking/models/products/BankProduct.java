@@ -19,10 +19,14 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.Objects;
 
-
+/**
+ * Base class from which all products stem. Includes all properties common to all products, such as an ID, its balance
+ * (divided into amount and currency, autogenerating Money instance upon get), owners, and a creation date.
+ */
 @Entity
 @DiscriminatorColumn(name = "product_type")
 @Inheritance(strategy = InheritanceType.JOINED)
+// Clarificadores necesarios para poder determinar la subclase a la que pertenece cada producto en llamadas a la API
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value= CreditCard.class , name="CreditCard"),
